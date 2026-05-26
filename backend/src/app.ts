@@ -28,6 +28,13 @@ import { adminStoriesRoutes } from './routes/admin-stories.js';
 import { publicStoriesRoutes } from './routes/public-stories.js';
 import { adminClubsRoutes } from './routes/admin-clubs.js';
 import { publicClubsRoutes } from './routes/public-clubs.js';
+import { adminNotificationsRoutes } from './routes/admin-notifications.js';
+import { userNotificationsRoutes } from './routes/user-notifications.js';
+import { adminSchedulerRoutes } from './routes/admin-scheduler.js';
+import { publicSearchRoutes } from './routes/public-search.js';
+import { adminAnalyticsRoutes } from './routes/admin-analytics.js';
+import { publicSitemapRoutes } from './routes/public-sitemap.js';
+import { SchedulerService } from './scheduler/scheduler-service.js';
 
 export interface BuildAppOptions {
   googleAuthProvider?: GoogleAuthProvider;
@@ -73,6 +80,21 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(publicStoriesRoutes);
   await app.register(adminClubsRoutes);
   await app.register(publicClubsRoutes);
+  await app.register(adminNotificationsRoutes);
+  await app.register(userNotificationsRoutes);
+  await app.register(adminSchedulerRoutes);
+  await app.register(publicSearchRoutes);
+  await app.register(adminAnalyticsRoutes);
+  await app.register(publicSitemapRoutes);
+
+  // Background scheduler initialization (run loop outside tests)
+  if (app.config.NODE_ENV !== 'test') {
+    const scheduler = new SchedulerService(app.db);
+    scheduler.start();
+    app.addHook('onClose', async () => {
+      scheduler.stop();
+    });
+  }
 
   return app;
 }

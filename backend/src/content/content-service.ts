@@ -1,5 +1,7 @@
 import type { Knex } from 'knex';
 import { badRequest, conflict, notFound } from '../http/api-error.js';
+import { SearchService } from '../search/search-service.js';
+import { NotificationService } from '../notifications/notification-service.js';
 
 export type ContentStatus = 'draft' | 'review' | 'published' | 'archived' | 'rejected';
 
@@ -63,7 +65,7 @@ export class ContentService {
 
     const contentType = await this.resolveContentType(input.contentTypeSlug);
 
-    return this.db.transaction(async (trx) => {
+    const created = await this.db.transaction(async (trx) => {
       const [created] = await trx('content_entities')
         .insert({
           content_type_id: contentType.id,
@@ -107,12 +109,21 @@ export class ContentService {
       await this.writeAuditLog(trx, contentType.id, created.id, 'create', {}, created, context);
       return created;
     });
+
+    const searchService = new SearchService(this.db);
+    try {
+      await searchService.indexEntity(String(created.id));
+    } catch (err) {
+      console.error('INDEXING ERROR ON CREATE:', err);
+    }
+
+    return created;
   }
 
   public async updateEntity(input: UpdateEntityInput, context: RequestAuditContext): Promise<Record<string, unknown>> {
     const contentType = await this.resolveContentType(input.contentTypeSlug);
 
-    return this.db.transaction(async (trx) => {
+    const updated = await this.db.transaction(async (trx) => {
       const existing = await trx('content_entities')
         .where({
           id: input.entityId,
@@ -142,12 +153,21 @@ export class ContentService {
       await this.writeAuditLog(trx, contentType.id, input.entityId, 'update', existing, updated, context);
       return updated;
     });
+
+    const searchService = new SearchService(this.db);
+    try {
+      await searchService.indexEntity(input.entityId);
+    } catch (err) {
+      console.error('INDEXING ERROR ON UPDATE:', err);
+    }
+
+    return updated;
   }
 
   public async transitionStatus(input: TransitionStatusInput, context: RequestAuditContext): Promise<Record<string, unknown>> {
     const contentType = await this.resolveContentType(input.contentTypeSlug);
 
-    return this.db.transaction(async (trx) => {
+    const updated = await this.db.transaction(async (trx) => {
       const existing = await trx('content_entities')
         .where({
           id: input.entityId,
@@ -188,6 +208,37 @@ export class ContentService {
       await this.writeAuditLog(trx, contentType.id, input.entityId, 'status_change', existing, updated, context);
       return updated;
     });
+
+    const searchService = new SearchService(this.db);
+    try {
+      await searchService.indexEntity(input.entityId);
+    } catch (err) {
+      console.error('INDEXING ERROR ON STATUS TRANSITION:', err);
+    }
+
+    let action: 'submit' | 'approve' | 'reject' | 'publish' | undefined;
+    if (input.status === 'review') {
+      action = 'submit';
+    } else if (input.status === 'published') {
+      action = 'publish';
+    } else if (input.status === 'rejected') {
+      action = 'reject';
+    }
+
+    if (action) {
+      const notificationService = new NotificationService(this.db);
+      notificationService.triggerWorkflowNotification(
+        input.entityId,
+        input.contentTypeSlug,
+        action,
+        input.remarks,
+        context.actorId
+      ).catch(err => {
+        console.error('NOTIFICATION ERROR ON STATUS TRANSITION:', err);
+      });
+    }
+
+    return updated;
   }
 
   public async autosaveDraft(input: AutosaveDraftInput, context: RequestAuditContext): Promise<Record<string, unknown>> {

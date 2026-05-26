@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { ToastHost } from '../toast-host/toast-host';
+import { NotificationsService } from '../../services/notifications.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -72,6 +73,12 @@ import { ToastHost } from '../toast-host/toast-host';
 
           <div class="topbar-right">
             @if (auth.context(); as context) {
+              <a routerLink="/admin/notifications" class="notification-bell" [attr.aria-label]="unreadNotifications() + ' unread notifications'" style="margin-right: 8px">
+                <span class="bell-icon">🔔</span>
+                @if (unreadNotifications() > 0) {
+                  <span class="badge">{{ unreadNotifications() }}</span>
+                }
+              </a>
               <div class="profile-chip">
                 <div class="avatar small">{{ initials(context.user.fullName) }}</div>
                 <div>
@@ -382,15 +389,56 @@ import { ToastHost } from '../toast-host/toast-host';
         display: none;
       }
     }
+
+    .notification-bell {
+      position: relative;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fff;
+      transition: all 0.16s ease;
+      color: #334155;
+    }
+    .notification-bell:hover {
+      background: #f1f5f9;
+      color: #2563eb;
+      border-color: #bfdbfe;
+    }
+    .notification-bell .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      border-radius: 999px;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
   `]
 })
 export class AdminLayout {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
+  private readonly notificationsService = inject(NotificationsService);
+
   readonly isCollapsed = signal(false);
   readonly currentUrl = signal(this.router.url);
   loginEmail = 'admin@pu.edu';
+  readonly unreadNotifications = signal(0);
 
   readonly navItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'DB' },
@@ -403,7 +451,11 @@ export class AdminLayout {
     { path: '/admin/announcements', label: 'Announcements', icon: 'AN' },
     { path: '/admin/achievements', label: 'Achievements', icon: 'AC' },
     { path: '/admin/stories', label: 'Stories', icon: 'ST' },
-    { path: '/admin/clubs', label: 'Clubs & Societies', icon: 'CL' }
+    { path: '/admin/clubs', label: 'Clubs & Societies', icon: 'CL' },
+    { path: '/admin/notifications', label: 'Notifications', icon: 'NT' },
+    { path: '/admin/scheduler', label: 'Scheduler', icon: 'SC' },
+    { path: '/admin/analytics', label: 'Analytics', icon: 'AY' },
+    { path: '/admin/search', label: 'Search Engine', icon: 'SE' }
   ];
 
   readonly currentSection = computed(() => {
@@ -414,13 +466,24 @@ export class AdminLayout {
   constructor() {
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
       this.currentUrl.set(event.urlAfterRedirects);
+      if (this.auth.isAuthenticated()) {
+        this.loadUnreadCount();
+      }
     });
 
     if (this.auth.isAuthenticated()) {
       this.auth.loadMe().subscribe({
+        next: () => this.loadUnreadCount(),
         error: () => this.auth.clearToken()
       });
     }
+  }
+
+  loadUnreadCount() {
+    this.notificationsService.getUnreadCount().subscribe({
+      next: (count) => this.unreadNotifications.set(count),
+      error: () => {}
+    });
   }
 
   localLogin() {

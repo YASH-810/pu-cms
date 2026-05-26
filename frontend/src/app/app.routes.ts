@@ -11,6 +11,10 @@ import { AdminAnnouncements } from './components/admin-announcements/admin-annou
 import { AdminAchievements } from './components/admin-achievements/admin-achievements';
 import { AdminStories } from './components/admin-stories/admin-stories';
 import { AdminClubs } from './components/admin-clubs/admin-clubs';
+import { AdminNotifications } from './components/admin-notifications/admin-notifications';
+import { AdminScheduler } from './components/admin-scheduler/admin-scheduler';
+import { AdminAnalytics } from './components/admin-analytics/admin-analytics';
+import { PublicSearch } from './components/public-search/public-search';
 
 export const routes: Routes = [
   {
@@ -70,6 +74,22 @@ export const routes: Routes = [
       {
         path: 'clubs',
         component: AdminClubs
+      },
+      {
+        path: 'notifications',
+        component: AdminNotifications
+      },
+      {
+        path: 'scheduler',
+        component: AdminScheduler
+      },
+      {
+        path: 'analytics',
+        component: AdminAnalytics
+      },
+      {
+        path: 'search',
+        component: PublicSearch
       }
     ]
   },

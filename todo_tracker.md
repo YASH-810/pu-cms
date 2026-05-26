@@ -296,35 +296,35 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement blog/news create API.
-- [ ] Implement blog/news update API.
-- [ ] Implement blog/news submit/review/approve/reject/publish/archive APIs.
-- [ ] Implement author attribution.
-- [ ] Implement reading time calculation.
-- [ ] Implement featured blog support.
-- [ ] Implement pinned article support if required by UI.
-- [ ] Implement blog organization mapping.
-- [ ] Implement blog category/tag integration.
-- [ ] Implement blog media integration.
-- [ ] Implement blog SEO integration.
-- [ ] Implement blog admin UI.
-- [ ] Implement public blog listing API.
-- [ ] Implement public blog detail API by slug.
-- [ ] Track blog views in `entity_views`.
+- [x] Implement blog/news create API.
+- [x] Implement blog/news update API.
+- [x] Implement blog/news submit/review/approve/reject/publish/archive APIs.
+- [x] Implement author attribution.
+- [x] Implement reading time calculation.
+- [x] Implement featured blog support.
+- [x] Implement pinned article support if required by UI.
+- [x] Implement blog organization mapping.
+- [x] Implement blog category/tag integration.
+- [x] Implement blog media integration.
+- [x] Implement blog SEO integration.
+- [x] Implement blog admin UI.
+- [x] Implement public blog listing API.
+- [x] Implement public blog detail API by slug.
+- [x] Track blog views in `entity_views`.
 
 ### Validation Tasks
 
-- [ ] Verify blog slug uniqueness.
-- [ ] Verify blogs filter by organization.
-- [ ] Verify blogs filter by category and tag.
-- [ ] Verify featured blogs can be listed.
-- [ ] Verify published blogs increment view tracking.
-- [ ] Verify blog updates are audited.
+- [x] Verify blog slug uniqueness.
+- [x] Verify blogs filter by organization.
+- [x] Verify blogs filter by category and tag.
+- [x] Verify featured blogs can be listed.
+- [x] Verify published blogs increment view tracking.
+- [x] Verify blog updates are audited.
 
 ### Documentation Tasks
 
-- [ ] Document blog/news workflow.
-- [ ] Document public blog filters.
+- [x] Document blog/news workflow.
+- [x] Document public blog filters.
 
 ## Phase 9: Events
 

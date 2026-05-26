@@ -130,6 +130,24 @@ import { NotificationsService } from '../../services/notifications.service';
       background: #ffffff;
       color: #0f172a;
       border-right: 1px solid #e2e8f0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      /* Custom scrollbar for sidebar */
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
     }
 
     .brand-row {
@@ -221,6 +239,7 @@ import { NotificationsService } from '../../services/notifications.service';
       flex-direction: column;
       min-width: 0;
       height: 100%;
+      overflow: hidden;
     }
 
     .topbar {

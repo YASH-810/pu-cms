@@ -238,31 +238,31 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement media metadata create/list/update/archive APIs.
-- [ ] Validate MIME types.
-- [ ] Validate file size limits.
-- [ ] Store media dimensions, duration, thumbnail URL, alt text, caption, and CDN-ready URL.
-- [ ] Link media to entities with `content_type_id` and `entity_id`.
-- [ ] Implement featured media behavior.
-- [ ] Implement category assignment APIs through `entity_categories`.
-- [ ] Implement tag assignment APIs through `entity_tags`.
-- [ ] Implement SEO metadata create/update APIs.
-- [ ] Enforce unique SEO metadata per `content_type_id`, `entity_id`, and `language_code`.
-- [ ] Implement saved draft create/update/restore APIs.
+- [x] Implement media metadata create/list/update/archive APIs.
+- [x] Validate MIME types.
+- [x] Validate file size limits.
+- [x] Store media dimensions, duration, thumbnail URL, alt text, caption, and CDN-ready URL.
+- [x] Link media to entities with `content_type_id` and `entity_id`.
+- [x] Implement featured media behavior.
+- [x] Implement category assignment APIs through `entity_categories`.
+- [x] Implement tag assignment APIs through `entity_tags`.
+- [x] Implement SEO metadata create/update APIs.
+- [x] Enforce unique SEO metadata per `content_type_id`, `entity_id`, and `language_code`.
+- [x] Implement saved draft create/update/restore APIs.
 
 ### Validation Tasks
 
-- [ ] Verify media can be linked to pages, blogs, events, achievements, announcements, stories, and clubs.
-- [ ] Verify invalid MIME types are rejected.
-- [ ] Verify missing alt text is flagged for image media.
-- [ ] Verify duplicate SEO metadata per language is blocked.
-- [ ] Verify drafts can be saved and restored without publishing.
+- [x] Verify media can be linked to pages, blogs, events, achievements, announcements, stories, and clubs.
+- [x] Verify invalid MIME types are rejected.
+- [x] Verify missing alt text is flagged for image media.
+- [x] Verify duplicate SEO metadata per language is blocked.
+- [x] Verify drafts can be saved and restored without publishing.
 
 ### Documentation Tasks
 
-- [ ] Document media validation rules.
-- [ ] Document taxonomy assignment rules.
-- [ ] Document SEO metadata fields.
+- [x] Document media validation rules.
+- [x] Document taxonomy assignment rules.
+- [x] Document SEO metadata fields.
 
 ## Phase 7: CMS Pages
 

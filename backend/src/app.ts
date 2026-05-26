@@ -10,6 +10,10 @@ import { adminUsersRoutes } from './routes/admin-users.js';
 import { adminOrganizationsRoutes } from './routes/admin-organizations.js';
 import { adminTaxonomiesRoutes } from './routes/admin-taxonomies.js';
 import { adminContentFrameworkRoutes } from './routes/admin-content-framework.js';
+import { adminMediaRoutes } from './routes/admin-media.js';
+import { adminTaxonomyAssignmentRoutes } from './routes/admin-taxonomy-assignments.js';
+import { adminSeoRoutes } from './routes/admin-seo.js';
+import { adminDraftsRoutes } from './routes/admin-drafts.js';
 
 export interface BuildAppOptions {
   googleAuthProvider?: GoogleAuthProvider;
@@ -37,6 +41,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(adminOrganizationsRoutes);
   await app.register(adminTaxonomiesRoutes);
   await app.register(adminContentFrameworkRoutes);
+  await app.register(adminMediaRoutes);
+  await app.register(adminTaxonomyAssignmentRoutes);
+  await app.register(adminSeoRoutes);
+  await app.register(adminDraftsRoutes);
 
   return app;
 }

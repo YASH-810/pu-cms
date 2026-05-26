@@ -165,10 +165,12 @@ test('Admin can create, read, update, transition status, and delete a page', asy
   assert.equal(publicBody.data.title, 'Updated Page Title');
 
   // Wait briefly for view tracking fire-and-forget task
-  await new Promise(resolve => setTimeout(resolve, 200));
-
-  // 8. Verify a view impression log was recorded in the database
-  const views = await app.db('entity_views').where({ entity_id: entityId });
+  let views = [];
+  for (let i = 0; i < 20; i++) {
+    views = await app.db('entity_views').where({ entity_id: entityId });
+    if (views.length >= 1) break;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
   assert.equal(views.length, 1);
 
   // 9. Soft-delete / Archive the page

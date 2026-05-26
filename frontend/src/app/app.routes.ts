@@ -7,6 +7,10 @@ import { AdminTaxonomies } from './components/admin-taxonomies/admin-taxonomies'
 import { AdminPages } from './components/admin-pages/admin-pages';
 import { AdminBlogs } from './components/admin-blogs/admin-blogs';
 import { AdminEvents } from './components/admin-events/admin-events';
+import { AdminAnnouncements } from './components/admin-announcements/admin-announcements';
+import { AdminAchievements } from './components/admin-achievements/admin-achievements';
+import { AdminStories } from './components/admin-stories/admin-stories';
+import { AdminClubs } from './components/admin-clubs/admin-clubs';
 
 export const routes: Routes = [
   {
@@ -50,6 +54,22 @@ export const routes: Routes = [
       {
         path: 'events',
         component: AdminEvents
+      },
+      {
+        path: 'announcements',
+        component: AdminAnnouncements
+      },
+      {
+        path: 'achievements',
+        component: AdminAchievements
+      },
+      {
+        path: 'stories',
+        component: AdminStories
+      },
+      {
+        path: 'clubs',
+        component: AdminClubs
       }
     ]
   },

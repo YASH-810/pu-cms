@@ -228,8 +228,12 @@ test('Admin routes validation and CRUD lifecycle', async () => {
   assert.equal(publicSlugRes2.json().data.title, 'Updated Announcement Title');
 
   // 11. View tracking impression log recorded
-  await new Promise(resolve => setTimeout(resolve, 150));
-  const views = await app.db('entity_views').where({ entity_id: entityId });
+  let views = [];
+  for (let i = 0; i < 20; i++) {
+    views = await app.db('entity_views').where({ entity_id: entityId });
+    if (views.length >= 1) break;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
   assert.equal(views.length, 1);
 
   // 12. Soft-delete / Archive
@@ -266,13 +270,22 @@ test('Public announcement lists and date window exclusions', async () => {
   assert.equal(futureRes.statusCode, 200);
   const futureId = futureRes.json().data.id;
 
-  // Publish future announcement
-  await app.inject({
+  // Publish future announcement: draft -> review -> published
+  const fReviewRes = await app.inject({
     method: 'POST',
     url: `/api/v1/admin/announcements/${futureId}/status`,
     headers: { authorization: `Bearer ${token}` },
-    payload: { status: 'published' }
+    payload: { status: 'review', remarks: 'Submitting future' }
   });
+  assert.equal(fReviewRes.statusCode, 200);
+
+  const fStatusRes = await app.inject({
+    method: 'POST',
+    url: `/api/v1/admin/announcements/${futureId}/status`,
+    headers: { authorization: `Bearer ${token}` },
+    payload: { status: 'published', remarks: 'Publishing future' }
+  });
+  assert.equal(fStatusRes.statusCode, 200);
 
   // Create an announcement that expired in the past
   const pastRes = await app.inject({
@@ -291,13 +304,22 @@ test('Public announcement lists and date window exclusions', async () => {
   assert.equal(pastRes.statusCode, 200);
   const pastId = pastRes.json().data.id;
 
-  // Publish expired announcement
-  await app.inject({
+  // Publish expired announcement: draft -> review -> published
+  const pReviewRes = await app.inject({
     method: 'POST',
     url: `/api/v1/admin/announcements/${pastId}/status`,
     headers: { authorization: `Bearer ${token}` },
-    payload: { status: 'published' }
+    payload: { status: 'review', remarks: 'Submitting expired' }
   });
+  assert.equal(pReviewRes.statusCode, 200);
+
+  const pStatusRes = await app.inject({
+    method: 'POST',
+    url: `/api/v1/admin/announcements/${pastId}/status`,
+    headers: { authorization: `Bearer ${token}` },
+    payload: { status: 'published', remarks: 'Publishing expired' }
+  });
+  assert.equal(pStatusRes.statusCode, 200);
 
   // Create currently valid announcement
   const activeRes = await app.inject({
@@ -316,13 +338,22 @@ test('Public announcement lists and date window exclusions', async () => {
   assert.equal(activeRes.statusCode, 200);
   const activeId = activeRes.json().data.id;
 
-  // Publish active announcement
-  await app.inject({
+  // Publish active announcement: draft -> review -> published
+  const aReviewRes = await app.inject({
     method: 'POST',
     url: `/api/v1/admin/announcements/${activeId}/status`,
     headers: { authorization: `Bearer ${token}` },
-    payload: { status: 'published' }
+    payload: { status: 'review', remarks: 'Submitting active' }
   });
+  assert.equal(aReviewRes.statusCode, 200);
+
+  const aStatusRes = await app.inject({
+    method: 'POST',
+    url: `/api/v1/admin/announcements/${activeId}/status`,
+    headers: { authorization: `Bearer ${token}` },
+    payload: { status: 'published', remarks: 'Publishing active' }
+  });
+  assert.equal(aStatusRes.statusCode, 200);
 
   // DB debug log
   const dbAnnouncement = await app.db('announcements').where({ id: activeId }).first();

@@ -364,73 +364,73 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement announcement type management.
-- [ ] Implement announcement create API.
-- [ ] Implement announcement update API.
-- [ ] Implement announcement submit/review/approve/reject/publish/archive APIs.
-- [ ] Implement title-plus-PDF validation.
-- [ ] Implement title-plus-description validation.
-- [ ] Implement full-content validation.
-- [ ] Add validity dates: `valid_from`, `valid_until`.
-- [ ] Add priority levels.
-- [ ] Implement announcement organization mapping.
-- [ ] Implement announcement category/tag integration.
-- [ ] Implement announcement media integration.
-- [ ] Implement announcement SEO integration.
-- [ ] Implement announcement admin UI.
-- [ ] Implement public announcement listing API.
-- [ ] Implement public announcement detail API by slug.
+- [x] Implement announcement type management.
+- [x] Implement announcement create API.
+- [x] Implement announcement update API.
+- [x] Implement announcement submit/review/approve/reject/publish/archive APIs.
+- [x] Implement title-plus-PDF validation.
+- [x] Implement title-plus-description validation.
+- [x] Implement full-content validation.
+- [x] Add validity dates: `valid_from`, `valid_until`.
+- [x] Add priority levels.
+- [x] Implement announcement organization mapping.
+- [x] Implement announcement category/tag integration.
+- [x] Implement announcement media integration.
+- [x] Implement announcement SEO integration.
+- [x] Implement announcement admin UI.
+- [x] Implement public announcement listing API.
+- [x] Implement public announcement detail API by slug.
 
 ### Validation Tasks
 
-- [ ] Verify title-plus-PDF announcements require PDF media.
-- [ ] Verify full-content announcements require content.
-- [ ] Verify expired announcements are hidden publicly.
-- [ ] Verify announcement filters by organization, type, category, and priority.
-- [ ] Verify announcement updates are audited.
+- [x] Verify title-plus-PDF announcements require PDF media.
+- [x] Verify full-content announcements require content.
+- [x] Verify expired announcements are hidden publicly.
+- [x] Verify announcement filters by organization, type, category, and priority.
+- [x] Verify announcement updates are audited.
 
 ### Documentation Tasks
 
-- [ ] Document announcement types.
-- [ ] Document announcement expiry behavior.
+- [x] Document announcement types.
+- [x] Document announcement expiry behavior.
 
 ## Phase 11: Achievements, Stories, and Clubs
 
 ### Implementation Tasks
 
-- [ ] Implement achievement create/update APIs.
-- [ ] Implement achievement workflow APIs.
-- [ ] Add achievement type, level, date, awarded-by, and prize amount fields.
-- [ ] Implement featured achievements.
-- [ ] Implement story create/update APIs.
-- [ ] Implement story workflow APIs.
-- [ ] Add story type, person name, person role, company, graduation year, and LinkedIn URL fields.
-- [ ] Implement featured stories.
-- [ ] Implement club details management through `organizations` plus `club_details`.
-- [ ] Add club leadership fields.
-- [ ] Add club social links.
-- [ ] Add club meeting schedule and joining process.
-- [ ] Implement club gallery/media support.
-- [ ] Implement organization, taxonomy, media, SEO, workflow, and audit integration for achievements.
-- [ ] Implement organization, taxonomy, media, SEO, workflow, and audit integration for stories.
-- [ ] Implement organization, taxonomy, media, SEO, workflow, and audit integration for clubs.
-- [ ] Implement admin UI for achievements, stories, and clubs.
-- [ ] Implement public listing/detail APIs for achievements, stories, and clubs.
+- [x] Implement achievement create/update APIs.
+- [x] Implement achievement workflow APIs.
+- [x] Add achievement type, level, date, awarded-by, and prize amount fields.
+- [x] Implement featured achievements.
+- [x] Implement story create/update APIs.
+- [x] Implement story workflow APIs.
+- [x] Add story type, person name, person role, company, graduation year, and LinkedIn URL fields.
+- [x] Implement featured stories.
+- [x] Implement club details management through `organizations` plus `club_details`.
+- [x] Add club leadership fields.
+- [x] Add club social links.
+- [x] Add club meeting schedule and joining process.
+- [x] Implement club gallery/media support.
+- [x] Implement organization, taxonomy, media, SEO, workflow, and audit integration for achievements.
+- [x] Implement organization, taxonomy, media, SEO, workflow, and audit integration for stories.
+- [x] Implement organization, taxonomy, media, SEO, workflow, and audit integration for clubs.
+- [x] Implement admin UI for achievements, stories, and clubs.
+- [x] Implement public listing/detail APIs for achievements, stories, and clubs.
 
 ### Validation Tasks
 
-- [ ] Verify achievements can be featured.
-- [ ] Verify stories can be featured.
-- [ ] Verify clubs inherit organization-scoped permissions.
-- [ ] Verify clubs linked to active content/events cannot be hard-deleted.
-- [ ] Verify archived achievements, stories, and clubs are hidden publicly.
-- [ ] Verify all updates are audited.
+- [x] Verify achievements can be featured.
+- [x] Verify stories can be featured.
+- [x] Verify clubs inherit organization-scoped permissions.
+- [x] Verify clubs linked to active content/events cannot be hard-deleted.
+- [x] Verify archived achievements, stories, and clubs are hidden publicly.
+- [x] Verify all updates are audited.
 
 ### Documentation Tasks
 
-- [ ] Document achievement workflow.
-- [ ] Document story workflow.
-- [ ] Document club governance.
+- [x] Document achievement workflow.
+- [x] Document story workflow.
+- [x] Document club governance.
 
 ## Phase 12: Notifications, Scheduler, Search, and Analytics
 

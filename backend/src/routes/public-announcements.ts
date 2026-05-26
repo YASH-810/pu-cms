@@ -59,12 +59,11 @@ export async function publicAnnouncementsRoutes(app: FastifyInstance): Promise<v
   app.get<{ Params: { slug: string } }>('/api/v1/public/announcements/:slug', async (request) => {
     const service = new AnnouncementService(request.server.db);
     const announcement = await service.getPublishedAnnouncementBySlug(request.params.slug);
-
     // Fire-and-forget view tracking
     service.trackView(announcement.entity_id, {
       ipAddress: request.ip,
       userAgent: request.headers['user-agent']
-    }).catch(() => { /* non-critical */ });
+    }).catch((err) => { console.error('TRACK VIEW ERROR ANNOUNCEMENT:', err); });
 
     return announcement;
   });

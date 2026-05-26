@@ -399,7 +399,11 @@ export class AdminLayout {
     { path: '/admin/taxonomies', label: 'Taxonomy', icon: 'TX' },
     { path: '/admin/pages', label: 'Pages', icon: 'PG' },
     { path: '/admin/blogs', label: 'Blogs & News', icon: 'BL' },
-    { path: '/admin/events', label: 'Events', icon: 'EV' }
+    { path: '/admin/events', label: 'Events', icon: 'EV' },
+    { path: '/admin/announcements', label: 'Announcements', icon: 'AN' },
+    { path: '/admin/achievements', label: 'Achievements', icon: 'AC' },
+    { path: '/admin/stories', label: 'Stories', icon: 'ST' },
+    { path: '/admin/clubs', label: 'Clubs & Societies', icon: 'CL' }
   ];
 
   readonly currentSection = computed(() => {

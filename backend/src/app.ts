@@ -22,6 +22,12 @@ import { adminEventsRoutes } from './routes/admin-events.js';
 import { publicEventsRoutes } from './routes/public-events.js';
 import { adminAnnouncementsRoutes } from './routes/admin-announcements.js';
 import { publicAnnouncementsRoutes } from './routes/public-announcements.js';
+import { adminAchievementsRoutes } from './routes/admin-achievements.js';
+import { publicAchievementsRoutes } from './routes/public-achievements.js';
+import { adminStoriesRoutes } from './routes/admin-stories.js';
+import { publicStoriesRoutes } from './routes/public-stories.js';
+import { adminClubsRoutes } from './routes/admin-clubs.js';
+import { publicClubsRoutes } from './routes/public-clubs.js';
 
 export interface BuildAppOptions {
   googleAuthProvider?: GoogleAuthProvider;
@@ -61,6 +67,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(publicEventsRoutes);
   await app.register(adminAnnouncementsRoutes);
   await app.register(publicAnnouncementsRoutes);
+  await app.register(adminAchievementsRoutes);
+  await app.register(publicAchievementsRoutes);
+  await app.register(adminStoriesRoutes);
+  await app.register(publicStoriesRoutes);
+  await app.register(adminClubsRoutes);
+  await app.register(publicClubsRoutes);
 
   return app;
 }

@@ -13,41 +13,41 @@ import { NotificationsService } from '../../services/notifications.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, ToastHost],
   template: `
-    <div class="admin-shell" [class.sidebar-collapsed]="isCollapsed()">
+    <div class="admin-shell">
       <aside class="sidebar">
-        <div class="brand-row">
-          <div class="brand-mark">PU</div>
-          @if (!isCollapsed()) {
+        <div class="sidebar-scrollable-content">
+          <div class="brand-row">
+            <div class="brand-mark">PU</div>
             <div class="brand-copy">
               <strong>University CMS</strong>
               <span>Governance Console</span>
             </div>
-          }
-        </div>
+          </div>
 
-        <nav class="nav-list" aria-label="Admin navigation">
-          @for (item of navItems; track item.path) {
-            <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">{{ item.icon }}</span>
-              @if (!isCollapsed()) {
+          <nav class="nav-list" aria-label="Admin navigation">
+            @for (item of navItems; track item.path) {
+              <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+                <span class="nav-icon">{{ item.icon }}</span>
                 <span>{{ item.label }}</span>
-              }
-            </a>
-          }
-        </nav>
+              </a>
+            }
+          </nav>
+        </div>
 
         <div class="sidebar-footer">
           @if (auth.context(); as context) {
             <div class="profile-card compact">
-              <div class="avatar">{{ initials(context.user.fullName) }}</div>
-              @if (!isCollapsed()) {
-                <div>
-                  <strong>{{ context.user.fullName }}</strong>
-                  <span>{{ context.globalRoles[0]?.name || 'Authenticated' }}</span>
-                </div>
-              }
+              <div class="profile-info">
+                <strong>{{ context.user.fullName }}</strong>
+                <span class="user-email">{{ context.user.email }}</span>
+              </div>
+              <button type="button" class="logout-btn" (click)="logout()" aria-label="Sign out">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                </svg>
+              </button>
             </div>
-          } @else if (!isCollapsed()) {
+          } @else {
             <form class="dev-login" (ngSubmit)="localLogin()">
               <label for="dev-login-email">Local admin email</label>
               <input id="dev-login-email" name="email" [(ngModel)]="loginEmail" autocomplete="email" />
@@ -60,11 +60,6 @@ import { NotificationsService } from '../../services/notifications.service';
       <section class="workspace">
         <header class="topbar">
           <div class="topbar-left">
-            <button type="button" class="icon-button" (click)="isCollapsed.set(!isCollapsed())" aria-label="Toggle sidebar">
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
             <div class="breadcrumb">
               <span>Admin</span>
               <strong>{{ currentSection() }}</strong>
@@ -73,20 +68,12 @@ import { NotificationsService } from '../../services/notifications.service';
 
           <div class="topbar-right">
             @if (auth.context(); as context) {
-              <a routerLink="/admin/notifications" class="notification-bell" [attr.aria-label]="unreadNotifications() + ' unread notifications'" style="margin-right: 8px">
+              <a routerLink="/admin/notifications" class="notification-bell" [attr.aria-label]="unreadNotifications() + ' unread notifications'">
                 <span class="bell-icon">🔔</span>
                 @if (unreadNotifications() > 0) {
                   <span class="badge">{{ unreadNotifications() }}</span>
                 }
               </a>
-              <div class="profile-chip">
-                <div class="avatar small">{{ initials(context.user.fullName) }}</div>
-                <div>
-                  <strong>{{ context.user.fullName }}</strong>
-                  <span>{{ context.user.email }}</span>
-                </div>
-              </div>
-              <button type="button" class="secondary-button" (click)="logout()">Logout</button>
             } @else {
               <span class="muted">Sign in to manage content governance</span>
             }
@@ -114,40 +101,20 @@ import { NotificationsService } from '../../services/notifications.service';
       grid-template-columns: 286px 1fr;
       height: 100%;
       min-width: 0;
-      transition: grid-template-columns 0.2s ease;
-    }
-
-    .admin-shell.sidebar-collapsed {
-      grid-template-columns: 86px 1fr;
     }
 
     /* FIX: Converted sidebar from dark blue to uniform white background */
     .sidebar {
       display: flex;
       flex-direction: column;
+      height: 100dvh;
+      min-height: 0;
       min-width: 0;
       padding: 20px 14px;
       background: #ffffff;
       color: #0f172a;
       border-right: 1px solid #e2e8f0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      /* Custom scrollbar for sidebar */
-      scrollbar-width: thin;
-      scrollbar-color: #cbd5e1 transparent;
-    }
-
-    .sidebar::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .sidebar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
-      border-radius: 4px;
+      box-sizing: border-box;
     }
 
     .brand-row {
@@ -190,11 +157,35 @@ import { NotificationsService } from '../../services/notifications.service';
       margin-top: 3px;
     }
 
+    .sidebar-scrollable-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+      padding-bottom: 12px;
+    }
+
+    .sidebar-scrollable-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar-scrollable-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar-scrollable-content::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
+    }
+
     .nav-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      flex: 1;
     }
 
     /* FIX: Changed navigation link text colors and hover states for light mode */
@@ -230,8 +221,52 @@ import { NotificationsService } from '../../services/notifications.service';
 
     /* FIX: Light border separator */
     .sidebar-footer {
+      margin-top: auto;
       padding: 14px 8px 0;
       border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .user-email {
+      font-size: 0.75rem !important;
+      color: #94a3b8 !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 180px;
+      display: block;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .logout-btn {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      flex-shrink: 0;
+    }
+
+    .logout-btn:hover {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+
+    .logout-btn svg {
+      width: 18px;
+      height: 18px;
     }
 
     .workspace {
@@ -263,25 +298,6 @@ import { NotificationsService } from '../../services/notifications.service';
       gap: 12px;
     }
 
-    .icon-button {
-      display: grid;
-      place-items: center;
-      gap: 3px;
-      width: 40px;
-      height: 40px;
-      border: 1px solid #dbe4ef;
-      border-radius: 12px;
-      background: #fff;
-      cursor: pointer;
-    }
-
-    .icon-button span {
-      display: block;
-      width: 16px;
-      height: 2px;
-      border-radius: 999px;
-      background: #334155;
-    }
 
     .breadcrumb {
       display: flex;
@@ -334,13 +350,11 @@ import { NotificationsService } from '../../services/notifications.service';
       border-radius: 999px;
     }
 
-    /* FIX: Profile card container background and borders for light theme */
     .profile-card.compact {
-      min-height: 52px;
-      padding: 8px;
-      border-radius: 14px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
       color: #0f172a;
     }
 
@@ -391,15 +405,6 @@ import { NotificationsService } from '../../services/notifications.service';
     }
 
     @media (max-width: 900px) {
-      .admin-shell,
-      .admin-shell.sidebar-collapsed {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        display: none;
-      }
-
       .topbar {
         padding: 0 16px;
       }
@@ -454,7 +459,6 @@ export class AdminLayout {
   readonly auth = inject(AuthService);
   private readonly notificationsService = inject(NotificationsService);
 
-  readonly isCollapsed = signal(false);
   readonly currentUrl = signal(this.router.url);
   loginEmail = 'admin@pu.edu';
   readonly unreadNotifications = signal(0);

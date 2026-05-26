@@ -3,6 +3,7 @@ import { requirePermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { EventService, type CreateEventInput, type UpdateEventInput } from '../events/event-service.js';
 import type { ContentStatus } from '../content/content-service.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -188,7 +189,7 @@ export async function adminEventsRoutes(app: FastifyInstance): Promise<void> {
       const service = new EventService(request.server.db);
       const context = await getActorContext(request);
 
-      return service.transitionStatus(request.params.id, status, remarks, context);
+      return service.transitionStatus(request.params.id, status, remarks ? sanitizeInputHtml(remarks) : undefined, context);
     }
   );
 

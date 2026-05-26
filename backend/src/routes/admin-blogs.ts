@@ -3,6 +3,7 @@ import { requirePermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { BlogService, type CreateBlogInput, type UpdateBlogInput } from '../blogs/blog-service.js';
 import type { ContentStatus } from '../content/content-service.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -80,7 +81,7 @@ export async function adminBlogsRoutes(app: FastifyInstance): Promise<void> {
         title: body.title,
         slug: body.slug,
         summary: body.summary ?? null,
-        bodyHtml: body.body_html ?? null,
+        bodyHtml: body.body_html ? sanitizeInputHtml(body.body_html) : null,
         heroImageUrl: body.hero_image_url ?? null,
         authorId: body.author_id ?? null,
         isFeatured: body.is_featured ?? false,
@@ -132,7 +133,7 @@ export async function adminBlogsRoutes(app: FastifyInstance): Promise<void> {
           title: request.body.title,
           slug: request.body.slug,
           summary: request.body.summary,
-          bodyHtml: request.body.body_html,
+          bodyHtml: request.body.body_html !== undefined ? (request.body.body_html ? sanitizeInputHtml(request.body.body_html) : null) : undefined,
           heroImageUrl: request.body.hero_image_url,
           authorId: request.body.author_id,
           isFeatured: request.body.is_featured,
@@ -158,7 +159,7 @@ export async function adminBlogsRoutes(app: FastifyInstance): Promise<void> {
       const service = new BlogService(request.server.db);
       const context = await getActorContext(request);
 
-      return service.transitionStatus(request.params.id, status, remarks, context);
+      return service.transitionStatus(request.params.id, status, remarks ? sanitizeInputHtml(remarks) : undefined, context);
     }
   );
 

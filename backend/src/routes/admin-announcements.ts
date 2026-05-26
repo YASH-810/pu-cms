@@ -4,6 +4,7 @@ import { badRequest } from '../http/api-error.js';
 import { AnnouncementService } from '../announcements/announcement-service.js';
 import type { CreateAnnouncementInput, UpdateAnnouncementInput, AnnouncementListFilter } from '../announcements/announcement-service.js';
 import type { ContentStatus } from '../content/content-service.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -95,7 +96,7 @@ export async function adminAnnouncementsRoutes(app: FastifyInstance): Promise<vo
         slug: body.slug,
         announcementTypeId: body.announcement_type_id,
         summary: body.summary ?? null,
-        bodyHtml: body.body_html ?? null,
+        bodyHtml: body.body_html ? sanitizeInputHtml(body.body_html) : null,
         pdfUrl: body.pdf_url ?? null,
         priority: body.priority,
         validFrom: body.valid_from,
@@ -148,7 +149,7 @@ export async function adminAnnouncementsRoutes(app: FastifyInstance): Promise<vo
           slug: request.body.slug,
           announcementTypeId: request.body.announcement_type_id,
           summary: request.body.summary,
-          bodyHtml: request.body.body_html,
+          bodyHtml: request.body.body_html !== undefined ? (request.body.body_html ? sanitizeInputHtml(request.body.body_html) : null) : undefined,
           pdfUrl: request.body.pdf_url,
           priority: request.body.priority,
           validFrom: request.body.valid_from,
@@ -174,7 +175,7 @@ export async function adminAnnouncementsRoutes(app: FastifyInstance): Promise<vo
       const service = new AnnouncementService(request.server.db);
       const context = await getActorContext(request);
 
-      return service.transitionStatus(request.params.id, status, remarks, context);
+      return service.transitionStatus(request.params.id, status, remarks ? sanitizeInputHtml(remarks) : undefined, context);
     }
   );
 

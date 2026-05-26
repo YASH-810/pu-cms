@@ -4,6 +4,7 @@ import { badRequest } from '../http/api-error.js';
 import { ClubService } from '../clubs/club-service.js';
 import type { CreateClubInput, UpdateClubInput, ClubListFilter } from '../clubs/club-service.js';
 import type { ContentStatus } from '../content/content-service.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -154,7 +155,7 @@ export async function adminClubsRoutes(app: FastifyInstance): Promise<void> {
       const service = new ClubService(request.server.db);
       const context = await getActorContext(request);
 
-      return service.transitionStatus(request.params.id, status, remarks, context);
+      return service.transitionStatus(request.params.id, status, remarks ? sanitizeInputHtml(remarks) : undefined, context);
     }
   );
 

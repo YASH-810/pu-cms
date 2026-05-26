@@ -436,46 +436,46 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement notification template management.
-- [ ] Create notifications for content submission.
-- [ ] Create notifications for approval.
-- [ ] Create notifications for rejection.
-- [ ] Create notifications for publication.
-- [ ] Create notifications for failed scheduled jobs.
-- [ ] Create notifications for role or permission changes.
-- [ ] Implement notification read/unread tracking.
-- [ ] Implement scheduled publishing jobs.
-- [ ] Implement automated archival jobs.
-- [ ] Implement scheduled notification dispatch.
-- [ ] Implement sitemap generation jobs.
-- [ ] Implement job retry and execution logs.
-- [ ] Implement search indexing.
-- [ ] Implement re-indexing after content updates.
-- [ ] Implement public global search.
-- [ ] Add search filters by content type, organization, category, and tag.
-- [ ] Add search pagination and sorting.
-- [ ] Exclude archived and inactive content from search.
-- [ ] Implement entity view tracking reports.
-- [ ] Implement content performance dashboard.
-- [ ] Implement search analytics dashboard.
-- [ ] Implement workflow performance dashboard.
+- [x] Implement notification template management.
+- [x] Create notifications for content submission.
+- [x] Create notifications for approval.
+- [x] Create notifications for rejection.
+- [x] Create notifications for publication.
+- [x] Create notifications for failed scheduled jobs.
+- [x] Create notifications for role or permission changes.
+- [x] Implement notification read/unread tracking.
+- [x] Implement scheduled publishing jobs.
+- [x] Implement automated archival jobs.
+- [x] Implement scheduled notification dispatch.
+- [x] Implement sitemap generation jobs.
+- [x] Implement job retry and execution logs.
+- [x] Implement search indexing.
+- [x] Implement re-indexing after content updates.
+- [x] Implement public global search.
+- [x] Add search filters by content type, organization, category, and tag.
+- [x] Add search pagination and sorting.
+- [x] Exclude archived and inactive content from search.
+- [x] Implement entity view tracking reports.
+- [x] Implement content performance dashboard.
+- [x] Implement search analytics dashboard.
+- [x] Implement workflow performance dashboard.
 
 ### Validation Tasks
 
-- [ ] Verify workflow actions create notifications.
-- [ ] Verify read/unread state persists.
-- [ ] Verify scheduled publishing runs at the expected time.
-- [ ] Verify automated archival hides expired content.
-- [ ] Verify failed jobs are retried and logged.
-- [ ] Verify search excludes archived content.
-- [ ] Verify analytics count views correctly.
+- [x] Verify workflow actions create notifications.
+- [x] Verify read/unread state persists.
+- [x] Verify scheduled publishing runs at the expected time.
+- [x] Verify automated archival hides expired content.
+- [x] Verify failed jobs are retried and logged.
+- [x] Verify search excludes archived content.
+- [x] Verify analytics count views correctly.
 
 ### Documentation Tasks
 
-- [ ] Document notification events.
-- [ ] Document scheduler jobs.
-- [ ] Document search indexing strategy.
-- [ ] Document analytics report definitions.
+- [x] Document notification events.
+- [x] Document scheduler jobs.
+- [x] Document search indexing strategy.
+- [x] Document analytics report definitions.
 
 ## Phase 13: Hardening and Operations
 

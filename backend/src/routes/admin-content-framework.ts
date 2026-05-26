@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { requirePermission } from '../auth/authorization.js';
 import { ContentService, type ContentStatus } from '../content/content-service.js';
 import { badRequest } from '../http/api-error.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -99,7 +100,7 @@ export async function adminContentFrameworkRoutes(app: FastifyInstance): Promise
           contentTypeSlug: request.params.contentTypeSlug,
           entityId: request.params.entityId,
           status: request.body.status,
-          remarks: request.body.remarks
+          remarks: request.body.remarks ? sanitizeInputHtml(request.body.remarks) : undefined
         },
         await getActorContext(request)
       );

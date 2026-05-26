@@ -4,6 +4,7 @@ import { badRequest } from '../http/api-error.js';
 import { AchievementService } from '../achievements/achievement-service.js';
 import type { CreateAchievementInput, UpdateAchievementInput, AchievementListFilter } from '../achievements/achievement-service.js';
 import type { ContentStatus } from '../content/content-service.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -164,7 +165,7 @@ export async function adminAchievementsRoutes(app: FastifyInstance): Promise<voi
       const service = new AchievementService(request.server.db);
       const context = await getActorContext(request);
 
-      return service.transitionStatus(request.params.id, status, remarks, context);
+      return service.transitionStatus(request.params.id, status, remarks ? sanitizeInputHtml(remarks) : undefined, context);
     }
   );
 

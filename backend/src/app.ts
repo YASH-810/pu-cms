@@ -5,6 +5,7 @@ import { authRoutes } from './auth/auth-routes.js';
 import { registerEnvironment } from './config/env.js';
 import { registerApiResponseFormatter, registerErrorHandler } from './http/api-response.js';
 import { registerDatabase } from './plugins/database.js';
+import { registerSecurity } from './plugins/security.js';
 import { healthRoutes } from './routes/health.js';
 import { adminUsersRoutes } from './routes/admin-users.js';
 import { adminOrganizationsRoutes } from './routes/admin-organizations.js';
@@ -52,6 +53,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     secret: app.config.SESSION_SECRET
   });
   await registerDatabase(app);
+  await registerSecurity(app);
   await registerApiResponseFormatter(app);
   await registerErrorHandler(app);
   await app.register(authRoutes, {

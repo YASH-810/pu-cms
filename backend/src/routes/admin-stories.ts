@@ -4,6 +4,7 @@ import { badRequest } from '../http/api-error.js';
 import { StoryService } from '../stories/story-service.js';
 import type { CreateStoryInput, UpdateStoryInput, StoryListFilter } from '../stories/story-service.js';
 import type { ContentStatus } from '../content/content-service.js';
+import { sanitizeInputHtml } from '../utils/sanitizer.js';
 
 interface JwtPayload {
   sub: string;
@@ -168,7 +169,7 @@ export async function adminStoriesRoutes(app: FastifyInstance): Promise<void> {
       const service = new StoryService(request.server.db);
       const context = await getActorContext(request);
 
-      return service.transitionStatus(request.params.id, status, remarks, context);
+      return service.transitionStatus(request.params.id, status, remarks ? sanitizeInputHtml(remarks) : undefined, context);
     }
   );
 

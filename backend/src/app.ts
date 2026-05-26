@@ -14,6 +14,8 @@ import { adminMediaRoutes } from './routes/admin-media.js';
 import { adminTaxonomyAssignmentRoutes } from './routes/admin-taxonomy-assignments.js';
 import { adminSeoRoutes } from './routes/admin-seo.js';
 import { adminDraftsRoutes } from './routes/admin-drafts.js';
+import { adminPagesRoutes } from './routes/admin-pages.js';
+import { publicPagesRoutes } from './routes/public-pages.js';
 
 export interface BuildAppOptions {
   googleAuthProvider?: GoogleAuthProvider;
@@ -45,6 +47,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(adminTaxonomyAssignmentRoutes);
   await app.register(adminSeoRoutes);
   await app.register(adminDraftsRoutes);
+  await app.register(adminPagesRoutes);
+  await app.register(publicPagesRoutes);
 
   return app;
 }

@@ -210,6 +210,21 @@ tbody tr:hover {
   color: #047857;
 }
 
+.pill-draft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.pill-review {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.pill-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .row-actions,
 .table-footer,
 .modal-card footer,

@@ -268,29 +268,29 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement page create API.
-- [ ] Implement page update API.
-- [ ] Implement page submit/review/approve/reject/publish/archive APIs.
-- [ ] Implement page organization mapping.
-- [ ] Implement page category/tag integration.
-- [ ] Implement page media integration.
-- [ ] Implement page SEO integration.
-- [ ] Implement page admin UI.
-- [ ] Implement public page read by slug.
-- [ ] Track page views in `entity_views`.
+- [x] Implement page create API.
+- [x] Implement page update API.
+- [x] Implement page submit/review/approve/reject/publish/archive APIs.
+- [x] Implement page organization mapping.
+- [x] Implement page category/tag integration.
+- [x] Implement page media integration.
+- [x] Implement page SEO integration.
+- [x] Implement page admin UI.
+- [x] Implement public page read by slug.
+- [x] Track page views in `entity_views`.
 
 ### Validation Tasks
 
-- [ ] Verify page slug uniqueness.
-- [ ] Verify draft pages are hidden publicly.
-- [ ] Verify published pages are visible publicly.
-- [ ] Verify page updates are audited.
-- [ ] Verify organization scope controls page access.
+- [x] Verify page slug uniqueness.
+- [x] Verify draft pages are hidden publicly.
+- [x] Verify published pages are visible publicly.
+- [x] Verify page updates are audited.
+- [x] Verify organization scope controls page access.
 
 ### Documentation Tasks
 
-- [ ] Document page authoring workflow.
-- [ ] Document public page API behavior.
+- [x] Document page authoring workflow.
+- [x] Document public page API behavior.
 
 ## Phase 8: Blogs and News
 

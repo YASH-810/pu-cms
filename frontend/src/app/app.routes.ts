@@ -6,6 +6,7 @@ import { AdminOrganizations } from './components/admin-organizations/admin-organ
 import { AdminTaxonomies } from './components/admin-taxonomies/admin-taxonomies';
 import { AdminPages } from './components/admin-pages/admin-pages';
 import { AdminBlogs } from './components/admin-blogs/admin-blogs';
+import { AdminEvents } from './components/admin-events/admin-events';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,10 @@ export const routes: Routes = [
       {
         path: 'blogs',
         component: AdminBlogs
+      },
+      {
+        path: 'events',
+        component: AdminEvents
       }
     ]
   },

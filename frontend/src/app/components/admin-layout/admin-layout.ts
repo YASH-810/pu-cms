@@ -398,7 +398,8 @@ export class AdminLayout {
     { path: '/admin/organizations', label: 'Organizations', icon: 'OR' },
     { path: '/admin/taxonomies', label: 'Taxonomy', icon: 'TX' },
     { path: '/admin/pages', label: 'Pages', icon: 'PG' },
-    { path: '/admin/blogs', label: 'Blogs & News', icon: 'BL' }
+    { path: '/admin/blogs', label: 'Blogs & News', icon: 'BL' },
+    { path: '/admin/events', label: 'Events', icon: 'EV' }
   ];
 
   readonly currentSection = computed(() => {

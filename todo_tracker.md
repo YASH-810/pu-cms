@@ -330,35 +330,35 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement event create API.
-- [ ] Implement event update API.
-- [ ] Implement event submit/review/approve/reject/publish/archive APIs.
-- [ ] Add event type support.
-- [ ] Add mode support: online, offline, hybrid.
-- [ ] Add venue, organizer, dates, times, timezone, registration link, and contact fields.
-- [ ] Add registration deadline and max participant fields.
-- [ ] Implement featured event support.
-- [ ] Implement event organization mapping.
-- [ ] Implement event category/tag integration.
-- [ ] Implement event media integration.
-- [ ] Implement event SEO integration.
-- [ ] Implement event admin UI.
-- [ ] Implement public event listing API.
-- [ ] Implement public event detail API by slug.
-- [ ] Track event views and engagement in `entity_views`.
+- [x] Implement event create API.
+- [x] Implement event update API.
+- [x] Implement event submit/review/approve/reject/publish/archive APIs.
+- [x] Add event type support.
+- [x] Add mode support: online, offline, hybrid.
+- [x] Add venue, organizer, dates, times, timezone, registration link, and contact fields.
+- [x] Add registration deadline and max participant fields.
+- [x] Implement featured event support.
+- [x] Implement event organization mapping.
+- [x] Implement event category/tag integration.
+- [x] Implement event media integration.
+- [x] Implement event SEO integration.
+- [x] Implement event admin UI.
+- [x] Implement public event listing API.
+- [x] Implement public event detail API by slug.
+- [x] Track event views and engagement in `entity_views`.
 
 ### Validation Tasks
 
-- [ ] Verify invalid event date ranges are blocked.
-- [ ] Verify expired/completed events can be archived.
-- [ ] Verify published events appear publicly.
-- [ ] Verify event filters by organization, type, mode, and featured state.
-- [ ] Verify event updates are audited.
+- [x] Verify invalid event date ranges are blocked.
+- [x] Verify expired/completed events can be archived.
+- [x] Verify published events appear publicly.
+- [x] Verify event filters by organization, type, mode, and featured state.
+- [x] Verify event updates are audited.
 
 ### Documentation Tasks
 
-- [ ] Document event lifecycle.
-- [ ] Document event validation rules.
+- [x] Document event lifecycle.
+- [x] Document event validation rules.
 
 ## Phase 10: Announcements
 

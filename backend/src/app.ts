@@ -20,6 +20,8 @@ import { adminBlogsRoutes } from './routes/admin-blogs.js';
 import { publicBlogsRoutes } from './routes/public-blogs.js';
 import { adminEventsRoutes } from './routes/admin-events.js';
 import { publicEventsRoutes } from './routes/public-events.js';
+import { adminAnnouncementsRoutes } from './routes/admin-announcements.js';
+import { publicAnnouncementsRoutes } from './routes/public-announcements.js';
 
 export interface BuildAppOptions {
   googleAuthProvider?: GoogleAuthProvider;
@@ -57,6 +59,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(publicBlogsRoutes);
   await app.register(adminEventsRoutes);
   await app.register(publicEventsRoutes);
+  await app.register(adminAnnouncementsRoutes);
+  await app.register(publicAnnouncementsRoutes);
 
   return app;
 }

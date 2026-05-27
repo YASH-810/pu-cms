@@ -101,6 +101,18 @@ export async function authRoutes(app: FastifyInstance, options: AuthRoutesOption
       throw unauthenticated('User is not authorized for this CMS');
     }
 
+    await app.db('users').where({ id: user.id }).update({
+      last_login_at: app.db.fn.now(),
+      updated_at: app.db.fn.now(),
+      updated_by: user.id
+    });
+
+    await app.db('user_login_logs').insert({
+      user_id: user.id,
+      ip_address: getClientIp(request),
+      user_agent: request.headers['user-agent'] ?? null
+    });
+
     const context = await getUserAuthContext(app.db, user.id);
     const token = app.jwt.sign({
       sub: user.id,

@@ -304,7 +304,7 @@ const TYPES = ['academic', 'research', 'sports', 'cultural', 'community', 'other
 
           <div style="display:flex;gap:20px;align-items:center;margin-top:8px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-              <input type="checkbox" id="ac-featured" [(ngModel)]="form.is_featured" name="is_featured" style="width:auto;accent-color:#2563eb" />
+              <input type="checkbox" id="ac-featured" [(ngModel)]="form.is_featured" name="is_featured" style="width:auto;accent-color:var(--primary-red)" />
               <span style="font-size:0.86rem;font-weight:700;color:#334155">Mark as Featured Achievement</span>
             </label>
           </div>

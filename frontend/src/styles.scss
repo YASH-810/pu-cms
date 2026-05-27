@@ -1,4 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-red: #9e1b1b;       /* Pillai Crimson */
+  --primary-red-hover: #7f1212;
+  --primary-red-light: #fef2f2;
+  --primary-red-alpha: rgba(158, 27, 27, 0.12);
+  --primary-red-shadow: rgba(158, 27, 27, 0.18);
+
+  --accent-gold: #e5a93b;       /* Pillai Gold */
+  --accent-gold-hover: #c9932c;
+  --accent-gold-light: #fffbeb;
+
+  --primary-navy: #0b1325;      /* Pillai Navy */
+  --primary-navy-hover: #070d1a;
+  --primary-navy-light: #f0f4f8;
+
+  --color-success: #047857;
+  --color-success-light: #dcfce7;
+  --color-warning: #b45309;
+  --color-warning-light: #fef3c7;
+  --color-danger: #be123c;
+  --color-danger-light: #fff1f2;
+  
+  --bg-primary: #f6f8fb;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+}
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -9,9 +39,9 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f6f8fb;
-  color: #0f172a;
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

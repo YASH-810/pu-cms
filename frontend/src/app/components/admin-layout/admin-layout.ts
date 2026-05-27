@@ -17,7 +17,7 @@ import { NotificationsService } from '../../services/notifications.service';
       <aside class="sidebar">
         <div class="sidebar-scrollable-content">
           <div class="brand-row">
-            <div class="brand-mark">PU</div>
+            <img src="/uni-logo.png" class="brand-logo" alt="University Logo">
             <div class="brand-copy">
               <strong>University CMS</strong>
               <span>Governance Console</span>
@@ -124,16 +124,26 @@ import { NotificationsService } from '../../services/notifications.service';
       padding: 6px 8px 26px;
     }
 
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      max-width: 44px;
+      max-height: 44px;
+      object-fit: contain;
+      border-radius: 10px;
+      flex: 0 0 auto;
+    }
+
     .brand-mark {
       display: grid;
       place-items: center;
       width: 44px;
       height: 44px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #2563eb, #14b8a6);
+      background: linear-gradient(135deg, var(--primary-red), var(--accent-gold));
       color: #fff;
       font-weight: 800;
-      box-shadow: 0 14px 30px rgba(20, 184, 166, 0.22);
+      box-shadow: 0 14px 30px var(--primary-red-shadow);
       flex: 0 0 auto;
     }
 
@@ -204,8 +214,8 @@ import { NotificationsService } from '../../services/notifications.service';
 
     .nav-link:hover,
     .nav-link.active {
-      background: #f1f5f9;
-      color: #2563eb;
+      background: var(--primary-red-light);
+      color: var(--primary-red);
     }
 
     .nav-icon {
@@ -337,8 +347,8 @@ import { NotificationsService } from '../../services/notifications.service';
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: var(--primary-red-light);
+      color: var(--primary-red);
       font-size: 0.82rem;
       font-weight: 800;
       flex: 0 0 auto;
@@ -393,8 +403,12 @@ import { NotificationsService } from '../../services/notifications.service';
 
     .dev-login button {
       border-color: transparent;
-      background: #2563eb;
+      background: var(--primary-red);
       color: #fff;
+      transition: background 0.16s ease;
+    }
+    .dev-login button:hover {
+      background: var(--primary-red-hover);
     }
 
     .content-area {
@@ -430,9 +444,9 @@ import { NotificationsService } from '../../services/notifications.service';
       color: #334155;
     }
     .notification-bell:hover {
-      background: #f1f5f9;
-      color: #2563eb;
-      border-color: #bfdbfe;
+      background: var(--primary-red-light);
+      color: var(--primary-red);
+      border-color: var(--primary-red);
     }
     .notification-bell .badge {
       position: absolute;

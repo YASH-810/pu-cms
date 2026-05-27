@@ -113,33 +113,33 @@ import { ToastService } from '../../services/toast.service';
   `,
   styles: [`
     .unread-highlight {
-      color: #3b82f6;
+      color: var(--primary-red);
     }
     .filter-tab {
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border-color);
       border-radius: 10px;
       padding: 8px 16px;
-      background: #fff;
+      background: var(--bg-card);
       font-weight: 700;
       cursor: pointer;
       font-size: 0.88rem;
-      color: #64748b;
+      color: var(--text-muted);
       transition: all 0.16s ease;
     }
     .filter-tab.active {
-      background: #f1f5f9;
-      color: #2563eb;
-      border-color: #cbd5e1;
+      background: var(--primary-red-light);
+      color: var(--primary-red);
+      border-color: var(--primary-red);
     }
     .notification-table tr {
       transition: background 0.12s ease;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border-color);
     }
     .notification-table tr:hover {
-      background: #f8fafc;
+      background: var(--bg-primary);
     }
     .unread-row {
-      background: #f8fafc;
+      background: var(--bg-primary);
     }
     .notification-row-content {
       display: flex;
@@ -156,8 +156,8 @@ import { ToastService } from '../../services/toast.service';
       flex-shrink: 0;
     }
     .notification-indicator.unread {
-      background: #3b82f6;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+      background: var(--primary-red);
+      box-shadow: 0 0 8px var(--primary-red-shadow);
     }
     .notification-text {
       display: flex;

@@ -71,7 +71,7 @@ import { ToastService } from '../../services/toast.service';
                   [attr.cx]="pt.x"
                   [attr.cy]="pt.y"
                   r="5"
-                  fill="#3b82f6"
+                  fill="var(--primary-red)"
                   stroke="#fff"
                   stroke-width="1.5"
                   [attr.title]="pt.label + ': ' + pt.value"
@@ -81,12 +81,12 @@ import { ToastService } from '../../services/toast.service';
               <!-- Gradients definition -->
               <defs>
                 <linearGradient id="chart-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#3b82f6" />
-                  <stop offset="100%" stop-color="#14b8a6" />
+                  <stop offset="0%" stop-color="var(--primary-red)" />
+                  <stop offset="100%" stop-color="var(--accent-gold)" />
                 </linearGradient>
                 <linearGradient id="chart-area-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.14" />
-                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
+                  <stop offset="0%" stop-color="var(--primary-red)" stop-opacity="0.14" />
+                  <stop offset="100%" stop-color="var(--primary-red)" stop-opacity="0.0" />
                 </linearGradient>
               </defs>
             </svg>
@@ -163,7 +163,7 @@ import { ToastService } from '../../services/toast.service';
                   @for (s of searchTrends(); track s.query) {
                     <tr>
                       <td>
-                        <span class="font-mono" style="color:#2563eb">"{{ s.query }}"</span>
+                        <span class="font-mono" style="color:var(--primary-red)">"{{ s.query }}"</span>
                       </td>
                       <td>{{ s.count }} times</td>
                       <td class="right font-mono">{{ s.avg_results }}</td>

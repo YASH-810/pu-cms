@@ -247,7 +247,7 @@ import { ToastService } from '../../services/toast.service';
       cursor: pointer;
     }
     .checkbox-label input {
-      accent-color: #2563eb;
+      accent-color: var(--primary-red);
     }
     .sidebar-select {
       width: 100%;
@@ -307,7 +307,7 @@ import { ToastService } from '../../services/toast.service';
       border-radius: 999px;
       letter-spacing: 0.04em;
     }
-    .type-badge.blog { background: #eff6ff; color: #1e40af; }
+    .type-badge.blog { background: var(--primary-red-light); color: var(--primary-red); }
     .type-badge.event { background: #f0fdfa; color: #0f766e; }
     .type-badge.announcement { background: #faf5ff; color: #6b21a8; }
     .type-badge.story { background: #fff7ed; color: #c2410c; }
@@ -340,7 +340,7 @@ import { ToastService } from '../../services/toast.service';
       border-radius: 6px;
     }
     .view-link {
-      color: #2563eb;
+      color: var(--primary-red);
       font-weight: 700;
     }
     .state-card {

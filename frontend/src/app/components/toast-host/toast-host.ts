@@ -53,12 +53,12 @@ import { ToastService } from '../../services/toast.service';
       height: 100%;
       min-height: 42px;
       border-radius: 999px;
-      background: #2563eb;
+      background: var(--primary-red);
     }
 
-    .toast-success .toast-mark { background: #059669; }
-    .toast-error .toast-mark { background: #dc2626; }
-    .toast-info .toast-mark { background: #2563eb; }
+    .toast-success .toast-mark { background: var(--color-success); }
+    .toast-error .toast-mark { background: var(--color-danger); }
+    .toast-info .toast-mark { background: var(--primary-red); }
 
     .toast-copy {
       display: flex;

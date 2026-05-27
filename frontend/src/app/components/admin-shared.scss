@@ -13,7 +13,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2563eb;
+  color: var(--primary-red);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -22,7 +22,7 @@
 
 h1, h2, h3 {
   margin: 0;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -47,10 +47,10 @@ h1 {
 .metric-card,
 .data-card,
 .modal-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+  background: var(--bg-card);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.04);
 }
 
 .metric-card {
@@ -59,7 +59,7 @@ h1 {
 
 .metric-card span {
   display: block;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -79,8 +79,8 @@ h1 {
   justify-content: space-between;
   gap: 16px;
   padding: 18px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #fbfdff;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
 }
 
 .search-field,
@@ -100,7 +100,7 @@ label,
 .form-field span,
 .search-field label,
 .select-field label {
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.78rem;
   font-weight: 800;
 }
@@ -108,10 +108,10 @@ label,
 input,
 select,
 textarea {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  background: #fff;
-  color: #0f172a;
+  background: var(--bg-card);
+  color: var(--text-primary);
   padding: 11px 12px;
   outline: none;
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
@@ -120,8 +120,8 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 4px var(--primary-red-alpha);
 }
 
 .table-wrap {
@@ -135,8 +135,8 @@ table {
 
 th {
   padding: 14px 18px;
-  color: #64748b;
-  background: #f8fafc;
+  color: var(--text-muted);
+  background: var(--bg-primary);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -146,8 +146,8 @@ th {
 
 td {
   padding: 16px 18px;
-  border-top: 1px solid #eef2f7;
-  color: #334155;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
   vertical-align: middle;
 }
 
@@ -156,7 +156,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--bg-primary);
 }
 
 .right {
@@ -188,8 +188,8 @@ tbody tr:hover {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--primary-red-light);
+  color: var(--primary-red);
   font-weight: 800;
   flex: 0 0 auto;
 }
@@ -253,35 +253,36 @@ tbody tr:hover {
 }
 
 .primary-button {
-  background: #2563eb;
+  background: var(--primary-red);
   color: #fff;
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 10px 22px var(--primary-red-shadow);
 }
 
 .primary-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 28px rgba(37, 99, 235, 0.22);
+  background: var(--primary-red-hover);
+  box-shadow: 0 16px 28px var(--primary-red-shadow);
 }
 
 .ghost-button,
 .tab-button {
-  border-color: #dbe4ef;
-  background: #fff;
-  color: #334155;
+  border-color: var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
 }
 
 .ghost-button:hover,
 .tab-button:hover,
 .tab-button.active {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: var(--primary-red-light);
+  border-color: var(--primary-red);
+  color: var(--primary-red);
 }
 
 .danger-button {
-  background: #fff1f2;
-  color: #be123c;
-  border-color: #fecdd3;
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  border-color: var(--color-danger-light);
 }
 
 .full {
@@ -373,7 +374,7 @@ tbody tr:hover {
 
 .role-option input {
   margin-top: 3px;
-  accent-color: #2563eb;
+  accent-color: var(--primary-red);
 }
 
 .role-option span {
@@ -383,7 +384,7 @@ tbody tr:hover {
 }
 
 .role-option small {
-  color: #64748b;
+  color: var(--text-muted);
   line-height: 1.35;
 }
 
@@ -400,9 +401,9 @@ tbody tr:hover {
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 14px;
-  background: #fbfdff;
+  background: var(--bg-card);
   margin: 12px 0;
 }
 
@@ -425,16 +426,16 @@ tbody tr:hover {
 }
 
 .tree-node {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  background: #fff;
+  background: var(--bg-card);
   padding: 12px;
   cursor: pointer;
 }
 
 .tree-node.active {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: var(--primary-red);
+  background: var(--primary-red-light);
 }
 
 .node-offset {

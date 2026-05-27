@@ -165,7 +165,7 @@ export class ReplaceUnderscoresPipe implements PipeTransform {
                     </td>
                     <td>
                       @if (st.linkedin_url) {
-                        <a [href]="st.linkedin_url" target="_blank" class="font-mono" style="font-size:0.82rem;color:#2563eb">Profile ↗</a>
+                        <a [href]="st.linkedin_url" target="_blank" class="font-mono" style="font-size:0.82rem;color:var(--primary-red)">Profile ↗</a>
                       } @else {
                         <span class="muted">—</span>
                       }
@@ -334,7 +334,7 @@ export class ReplaceUnderscoresPipe implements PipeTransform {
             </label>
             <div style="display:flex;align-items:center;padding-top:20px">
               <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-                <input type="checkbox" id="st-featured" [(ngModel)]="form.is_featured" name="is_featured" style="width:auto;accent-color:#2563eb" />
+                <input type="checkbox" id="st-featured" [(ngModel)]="form.is_featured" name="is_featured" style="width:auto;accent-color:var(--primary-red)" />
                 <span style="font-size:0.86rem;font-weight:700;color:#334155">Mark as Featured Story</span>
               </label>
             </div>

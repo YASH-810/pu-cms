@@ -15,8 +15,14 @@ import { AdminNotifications } from './components/admin-notifications/admin-notif
 import { AdminScheduler } from './components/admin-scheduler/admin-scheduler';
 import { AdminAnalytics } from './components/admin-analytics/admin-analytics';
 import { PublicSearch } from './components/public-search/public-search';
+import { LoginPage } from './components/login/login';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+  {
+    path: 'login',
+    component: LoginPage
+  },
   {
     path: '',
     redirectTo: 'admin/dashboard',
@@ -25,6 +31,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayout,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -95,6 +102,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'admin/dashboard'
+    redirectTo: 'login'
   }
 ];

@@ -533,7 +533,7 @@ export class AdminLayout {
   logout() {
     this.auth.clearToken();
     this.toast.info('Signed out');
-    this.router.navigate(['/admin/dashboard']);
+    this.router.navigate(['/login']);
   }
 
   initials(name: string): string {

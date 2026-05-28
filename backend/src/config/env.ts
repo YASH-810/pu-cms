@@ -12,6 +12,7 @@ export interface AppConfig {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_CALLBACK_URL: string;
+  SUPER_ADMIN_EMAIL?: string;
   SESSION_SECRET: string;
 }
 
@@ -63,6 +64,9 @@ const schema = {
       type: 'string'
     },
     GOOGLE_CALLBACK_URL: {
+      type: 'string'
+    },
+    SUPER_ADMIN_EMAIL: {
       type: 'string'
     },
     SESSION_SECRET: {

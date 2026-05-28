@@ -13,8 +13,12 @@ const db = createDatabaseConnection({
   SESSION_SECRET: process.env.SESSION_SECRET ?? 'local-development-secret'
 });
 
-const email = process.argv[2] ?? 'admin@pu.edu';
-const fullName = process.argv[3] ?? 'Local Super Admin';
+const email = process.env.SUPER_ADMIN_EMAIL ?? process.argv[2];
+if (!email) {
+  console.error('Error: SUPER_ADMIN_EMAIL is not defined in the environment or passed as an argument.');
+  process.exit(1);
+}
+const fullName =process.env.SUPER_ADMIN_NAME ?? 'Super Admin';
 
 try {
   const [user] = await db('users')
@@ -47,7 +51,7 @@ try {
     .onConflict(['user_id', 'role_id'])
     .ignore();
 
-  console.log(`Seeded local Super Admin: ${user.email}`);
+  console.log(`Seeded Super Admin: ${user.email}`);
 } finally {
   await db.destroy();
 }

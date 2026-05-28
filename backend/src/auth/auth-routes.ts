@@ -75,15 +75,15 @@ export async function authRoutes(app: FastifyInstance, options: AuthRoutesOption
         redirectUri: app.config.GOOGLE_CALLBACK_URL
       });
 
-      // Validate email domain
-      if (!isAllowedEmailDomain(profile.email)) {
-        const errorMsg = encodeURIComponent(`Access denied. Only @${ALLOWED_EMAIL_DOMAIN} email addresses are allowed.`);
-        return reply.redirect(`${frontendLoginUrl}?auth_error=${errorMsg}`);
-      }
-
       const user = await getActiveUserByEmail(app.db, profile.email);
 
       if (!user) {
+        // Provide domain-specific error if they are outside the allowed domain
+        if (!isAllowedEmailDomain(profile.email)) {
+          const errorMsg = encodeURIComponent(`Access denied. Only @${ALLOWED_EMAIL_DOMAIN} email addresses are allowed.`);
+          return reply.redirect(`${frontendLoginUrl}?auth_error=${errorMsg}`);
+        }
+
         const errorMsg = encodeURIComponent('User is not authorized for this CMS. Contact your administrator.');
         return reply.redirect(`${frontendLoginUrl}?auth_error=${errorMsg}`);
       }

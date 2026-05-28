@@ -118,10 +118,8 @@ import { ToastService } from '../../services/toast.service';
               <span>Parent Organization</span>
               <select [(ngModel)]="formOrg.parent_id" name="parentId">
                 <option [ngValue]="null">None</option>
-                @for (parent of flatOrganizations(); track parent.id) {
-                  @if (!isEditMode() || parent.id !== formOrg.id) {
-                    <option [value]="parent.id">{{ parent.name }} ({{ parent.org_type }})</option>
-                  }
+                @for (parent of filteredParentOrgs(); track parent.id) {
+                  <option [value]="parent.id">{{ parent.name }} ({{ parent.org_type }})</option>
                 }
               </select>
             </label>
@@ -213,6 +211,38 @@ export class AdminOrganizations implements OnInit {
     this.orgService.getOrganization(id).subscribe({
       next: (org) => this.selectedOrg.set(org),
       error: (error) => this.toast.fromApiError(error, 'Failed to load organization')
+    });
+  }
+
+  getAllowedParentTypes(type: string | undefined): string[] {
+    // Strictly enforcing immediate parent hierarchy based on the provided list
+    switch (type) {
+      case 'school': return ['university'];
+      case 'department': return ['school'];
+      case 'program': return ['department'];
+      case 'club': return ['program', 'department', 'university'];
+      case 'center': return ['university', 'school'];
+      case 'office': return ['university', 'school', 'center'];
+      case 'exam_cell': return ['university'];
+      case 'sports': return ['university'];
+      case 'university': return [];
+      default: return [];
+    }
+  }
+
+  filteredParentOrgs(): Organization[] {
+    const type = this.formOrg.org_type;
+    const allowed = this.getAllowedParentTypes(type);
+    
+    return this.flatOrganizations().filter(org => {
+      // Prevent self-referencing
+      if (this.isEditMode() && org.id === this.formOrg.id) return false;
+      // If there are allowed parents for this type, enforce them
+      if (allowed.length > 0 && !allowed.includes(org.org_type)) return false;
+      // Universities generally don't have parents
+      if (type === 'university') return false;
+      
+      return true;
     });
   }
 

@@ -1,6 +1,5 @@
 import type { Knex } from 'knex';
-import { badRequest, conflict, notFound } from '../http/api-error.js';
-import { SearchService } from '../search/search-service.js';
+import { notFound, badRequest, conflict } from '../http/api-error.js';
 import { NotificationService } from '../notifications/notification-service.js';
 
 export type ContentStatus = 'draft' | 'review' | 'published' | 'archived' | 'rejected';
@@ -110,12 +109,7 @@ export class ContentService {
       return created;
     });
 
-    const searchService = new SearchService(this.db);
-    try {
-      await searchService.indexEntity(String(created.id));
-    } catch (err) {
-      console.error('INDEXING ERROR ON CREATE:', err);
-    }
+
 
     return created;
   }
@@ -154,12 +148,7 @@ export class ContentService {
       return updated;
     });
 
-    const searchService = new SearchService(this.db);
-    try {
-      await searchService.indexEntity(input.entityId);
-    } catch (err) {
-      console.error('INDEXING ERROR ON UPDATE:', err);
-    }
+
 
     return updated;
   }
@@ -209,12 +198,7 @@ export class ContentService {
       return updated;
     });
 
-    const searchService = new SearchService(this.db);
-    try {
-      await searchService.indexEntity(input.entityId);
-    } catch (err) {
-      console.error('INDEXING ERROR ON STATUS TRANSITION:', err);
-    }
+
 
     let action: 'submit' | 'approve' | 'reject' | 'publish' | undefined;
     if (input.status === 'review') {

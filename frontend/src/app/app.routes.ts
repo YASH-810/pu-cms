@@ -12,9 +12,6 @@ import { AdminAchievements } from './components/admin-achievements/admin-achieve
 import { AdminStories } from './components/admin-stories/admin-stories';
 import { AdminClubs } from './components/admin-clubs/admin-clubs';
 import { AdminNotifications } from './components/admin-notifications/admin-notifications';
-import { AdminScheduler } from './components/admin-scheduler/admin-scheduler';
-import { AdminAnalytics } from './components/admin-analytics/admin-analytics';
-import { PublicSearch } from './components/public-search/public-search';
 import { LoginPage } from './components/login/login';
 import { authGuard } from './guards/auth.guard';
 
@@ -85,18 +82,6 @@ export const routes: Routes = [
       {
         path: 'notifications',
         component: AdminNotifications
-      },
-      {
-        path: 'scheduler',
-        component: AdminScheduler
-      },
-      {
-        path: 'analytics',
-        component: AdminAnalytics
-      },
-      {
-        path: 'search',
-        component: PublicSearch
       }
     ]
   },

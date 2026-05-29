@@ -25,7 +25,7 @@ import { NotificationsService } from '../../services/notifications.service';
           </div>
 
           <nav class="nav-list" aria-label="Admin navigation">
-            @for (item of navItems; track item.path) {
+            @for (item of filteredNavItems(); track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
                 <span class="nav-icon">{{ item.icon }}</span>
                 <span>{{ item.label }}</span>
@@ -477,26 +477,32 @@ export class AdminLayout {
   loginEmail = 'admin@pu.edu';
   readonly unreadNotifications = signal(0);
 
-  readonly navItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: 'DB' },
-    { path: '/admin/users', label: 'Users', icon: 'US' },
-    { path: '/admin/organizations', label: 'Organizations', icon: 'OR' },
-    { path: '/admin/taxonomies', label: 'Taxonomy', icon: 'TX' },
-    { path: '/admin/pages', label: 'Pages', icon: 'PG' },
-    { path: '/admin/blogs', label: 'Blogs & News', icon: 'BL' },
-    { path: '/admin/events', label: 'Events', icon: 'EV' },
-    { path: '/admin/announcements', label: 'Announcements', icon: 'AN' },
-    { path: '/admin/achievements', label: 'Achievements', icon: 'AC' },
-    { path: '/admin/stories', label: 'Stories', icon: 'ST' },
-    { path: '/admin/clubs', label: 'Clubs & Societies', icon: 'CL' },
-    { path: '/admin/notifications', label: 'Notifications', icon: 'NT' },
-    { path: '/admin/scheduler', label: 'Scheduler', icon: 'SC' },
-    { path: '/admin/analytics', label: 'Analytics', icon: 'AY' },
-    { path: '/admin/search', label: 'Search Engine', icon: 'SE' }
-  ];
+  readonly filteredNavItems = computed(() => {
+    const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
+    const isSuperAdmin = roles.includes('SUPER_ADMIN') || roles.includes('UNIVERSITY_ADMIN');
+    
+    const items = [
+      { path: '/admin/dashboard', label: 'Dashboard', icon: 'DB' },
+      { path: '/admin/blogs', label: 'Blogs & News', icon: 'BL' },
+      { path: '/admin/events', label: 'Events', icon: 'EV' },
+      { path: '/admin/announcements', label: 'Announcements', icon: 'AN' },
+      { path: '/admin/achievements', label: 'Achievements', icon: 'AC' },
+      { path: '/admin/stories', label: 'Stories', icon: 'ST' },
+      { path: '/admin/clubs', label: 'Clubs & Societies', icon: 'CL' }
+    ];
+
+    if (isSuperAdmin) {
+      items.push({ path: '/admin/users', label: 'Users', icon: 'US' });
+      items.push({ path: '/admin/organizations', label: 'Organizations', icon: 'OR' });
+      items.push({ path: '/admin/taxonomies', label: 'Taxonomy', icon: 'TX' });
+      items.push({ path: '/admin/notifications', label: 'Notifications', icon: 'NT' });
+    }
+    
+    return items;
+  });
 
   readonly currentSection = computed(() => {
-    const active = this.navItems.find((item) => this.currentUrl().startsWith(item.path));
+    const active = this.filteredNavItems().find((item) => this.currentUrl().startsWith(item.path));
     return active?.label ?? 'Dashboard';
   });
 

@@ -216,7 +216,6 @@ export class AchievementService {
         .where({ id })
         .update({
           archived_at: trx.fn.now(),
-          deleted_at: trx.fn.now(),
           updated_at: trx.fn.now(),
           updated_by: context.actorId
         });
@@ -252,7 +251,6 @@ export class AchievementService {
     if (status === 'published') update.published_at = this.db.fn.now();
     if (status === 'archived') {
       update.archived_at = this.db.fn.now();
-      update.deleted_at = this.db.fn.now();
     }
 
     const [updatedAchievement] = await this.db('achievements')

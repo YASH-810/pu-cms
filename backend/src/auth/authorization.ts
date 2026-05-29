@@ -142,3 +142,37 @@ export function requirePermission(
     }
   };
 }
+
+export function requireStatusPermission(
+  writePermissionCode: string,
+  publishPermissionCode: string,
+  resolveContext: PermissionContextResolver = () => ({})
+): preHandlerHookHandler {
+  return async function statusPermissionGuard(request) {
+    let payload: JwtPayload;
+
+    try {
+      payload = await request.jwtVerify<JwtPayload>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+
+    const body = request.body as { status?: string };
+    const targetStatus = body?.status;
+    const requiredPermissionCode = (targetStatus === 'review' || targetStatus === 'draft') 
+      ? writePermissionCode 
+      : publishPermissionCode;
+
+    const decision = await resolvePermission(
+      request.server.db, 
+      payload.sub, 
+      requiredPermissionCode, 
+      await resolveContext(request)
+    );
+
+    if (!decision.allowed) {
+      throw forbidden(decision.reason);
+    }
+  };
+}
+

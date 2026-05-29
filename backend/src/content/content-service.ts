@@ -47,11 +47,11 @@ interface AutosaveDraftInput {
 }
 
 const allowedTransitions: Record<ContentStatus, ContentStatus[]> = {
-  draft: ['review'],
-  review: ['published', 'rejected'],
+  draft: ['review', 'archived'],
+  review: ['published', 'rejected', 'archived'],
   published: ['archived'],
   archived: [],
-  rejected: ['draft']
+  rejected: ['draft', 'archived']
 };
 
 export class ContentService {
@@ -184,6 +184,13 @@ export class ContentService {
           updated_by: context.actorId
         })
         .returning('*');
+
+      try {
+        const tableName = input.contentTypeSlug === 'club' ? 'club_details' : input.contentTypeSlug === 'story' ? 'stories' : input.contentTypeSlug + 's';
+        await trx(tableName).where({ entity_id: input.entityId }).update({ status: nextStatus });
+      } catch (err) {
+        // Ignore if column doesn't exist
+      }
 
       await trx('entity_approval_logs').insert({
         content_type_id: contentType.id,

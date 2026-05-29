@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { requirePermission } from '../auth/authorization.js';
+import { requirePermission, requireStatusPermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { PageService, type CreatePageInput, type UpdatePageInput } from '../pages/page-service.js';
 import type { ContentStatus } from '../content/content-service.js';
@@ -61,6 +61,7 @@ export async function adminPagesRoutes(app: FastifyInstance): Promise<void> {
   const createGuard = requirePermission('CREATE_PAGE');
   const deleteGuard = requirePermission('DELETE_PAGE');
   const publishGuard = requirePermission('PUBLISH_PAGE');
+  const statusGuard = requireStatusPermission('UPDATE_PAGE', 'PUBLISH_PAGE');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/pages
@@ -150,7 +151,7 @@ export async function adminPagesRoutes(app: FastifyInstance): Promise<void> {
   // ---------------------------------------------------------------------------
   app.post<{ Params: { id: string }; Body: StatusBody }>(
     '/api/v1/admin/pages/:id/status',
-    { preHandler: [publishGuard] },
+    { preHandler: [statusGuard] },
     async (request) => {
       const { status, remarks } = request.body;
       if (!status) {

@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { requirePermission } from '../auth/authorization.js';
+import { requirePermission, requireStatusPermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { BlogService, type CreateBlogInput, type UpdateBlogInput } from '../blogs/blog-service.js';
 import type { ContentStatus } from '../content/content-service.js';
@@ -62,6 +62,7 @@ export async function adminBlogsRoutes(app: FastifyInstance): Promise<void> {
   const createGuard = requirePermission('CREATE_BLOG');
   const deleteGuard = requirePermission('DELETE_BLOG');
   const publishGuard = requirePermission('PUBLISH_BLOG');
+  const statusGuard = requireStatusPermission('UPDATE_BLOG', 'PUBLISH_BLOG');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/blogs
@@ -149,7 +150,7 @@ export async function adminBlogsRoutes(app: FastifyInstance): Promise<void> {
   // ---------------------------------------------------------------------------
   app.post<{ Params: { id: string }; Body: StatusBody }>(
     '/api/v1/admin/blogs/:id/status',
-    { preHandler: [publishGuard] },
+    { preHandler: [statusGuard] },
     async (request) => {
       const { status, remarks } = request.body;
       if (!status) {

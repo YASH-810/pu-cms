@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { requirePermission } from '../auth/authorization.js';
+import { requirePermission, requireStatusPermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { ClubService } from '../clubs/club-service.js';
 import type { CreateClubInput, UpdateClubInput, ClubListFilter } from '../clubs/club-service.js';
@@ -59,6 +59,7 @@ export async function adminClubsRoutes(app: FastifyInstance): Promise<void> {
   const createGuard = requirePermission('REVIEW_CONTENT');
   const deleteGuard = requirePermission('REVIEW_CONTENT');
   const publishGuard = requirePermission('APPROVE_CONTENT');
+  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/clubs
@@ -145,7 +146,7 @@ export async function adminClubsRoutes(app: FastifyInstance): Promise<void> {
   // ---------------------------------------------------------------------------
   app.post<{ Params: { id: string }; Body: StatusBody }>(
     '/api/v1/admin/clubs/:id/status',
-    { preHandler: [publishGuard] },
+    { preHandler: [statusGuard] },
     async (request) => {
       const { status, remarks } = request.body;
       if (!status) {

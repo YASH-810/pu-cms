@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { requirePermission } from '../auth/authorization.js';
+import { requirePermission, requireStatusPermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { AnnouncementService } from '../announcements/announcement-service.js';
 import type { CreateAnnouncementInput, UpdateAnnouncementInput, AnnouncementListFilter } from '../announcements/announcement-service.js';
@@ -65,6 +65,7 @@ export async function adminAnnouncementsRoutes(app: FastifyInstance): Promise<vo
   const createGuard = requirePermission('REVIEW_CONTENT');
   const deleteGuard = requirePermission('REVIEW_CONTENT');
   const publishGuard = requirePermission('APPROVE_CONTENT');
+  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
 
   // ---------------------------------------------------------------------------
   // GET /api/v1/admin/announcements/types
@@ -165,7 +166,7 @@ export async function adminAnnouncementsRoutes(app: FastifyInstance): Promise<vo
   // ---------------------------------------------------------------------------
   app.post<{ Params: { id: string }; Body: StatusBody }>(
     '/api/v1/admin/announcements/:id/status',
-    { preHandler: [publishGuard] },
+    { preHandler: [statusGuard] },
     async (request) => {
       const { status, remarks } = request.body;
       if (!status) {

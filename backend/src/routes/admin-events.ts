@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { requirePermission } from '../auth/authorization.js';
+import { requirePermission, requireStatusPermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { EventService, type CreateEventInput, type UpdateEventInput } from '../events/event-service.js';
 import type { ContentStatus } from '../content/content-service.js';
@@ -77,6 +77,7 @@ export async function adminEventsRoutes(app: FastifyInstance): Promise<void> {
   const createGuard = requirePermission('CREATE_EVENT');
   const deleteGuard = requirePermission('DELETE_EVENT');
   const publishGuard = requirePermission('PUBLISH_EVENT');
+  const statusGuard = requireStatusPermission('UPDATE_EVENT', 'PUBLISH_EVENT');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/events
@@ -179,7 +180,7 @@ export async function adminEventsRoutes(app: FastifyInstance): Promise<void> {
   // ---------------------------------------------------------------------------
   app.post<{ Params: { id: string }; Body: StatusBody }>(
     '/api/v1/admin/events/:id/status',
-    { preHandler: [publishGuard] },
+    { preHandler: [statusGuard] },
     async (request) => {
       const { status, remarks } = request.body;
       if (!status) {

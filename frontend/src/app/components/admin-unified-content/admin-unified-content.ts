@@ -198,16 +198,16 @@ export class AdminUnifiedContent implements OnInit {
     const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
     const isSuperAdmin = roles.includes('SUPER_ADMIN') || roles.includes('UNIVERSITY_ADMIN');
     
-    // Editors only see their own content in the 'All' tab, but maybe they should see everything they created everywhere.
-    // Let's filter by author_id if they are not admin.
-    if (!isSuperAdmin) {
+    // Editors only see their own content in the 'All' tab.
+    // Published, Archived, and Review views show all content regardless of author.
+    if (!isSuperAdmin && this.viewMode() === 'all') {
       url += `&author_id=${this.auth.context()?.user?.id}`;
     }
 
-    this.http.get<{ data: UnifiedContent[], total: number }>(url).subscribe({
+    this.http.get<{ data: { data: UnifiedContent[], total: number } }>(url).subscribe({
       next: (res) => {
-        this.items.set(res.data);
-        this.total.set(res.total);
+        this.items.set(res.data.data);
+        this.total.set(res.data.total);
         this.loading.set(false);
       },
       error: (err) => {

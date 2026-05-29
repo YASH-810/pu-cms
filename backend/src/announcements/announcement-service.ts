@@ -290,7 +290,6 @@ export class AnnouncementService {
         .where({ id })
         .update({
           archived_at: trx.fn.now(),
-          deleted_at: trx.fn.now(),
           updated_at: trx.fn.now(),
           updated_by: context.actorId
         });
@@ -336,7 +335,6 @@ export class AnnouncementService {
     if (status === 'published') update.published_at = this.db.fn.now();
     if (status === 'archived') {
       update.archived_at = this.db.fn.now();
-      update.deleted_at = this.db.fn.now();
     }
 
     const [updatedAnnouncement] = await this.db('announcements')

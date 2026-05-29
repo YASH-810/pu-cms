@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { requirePermission } from '../auth/authorization.js';
+import { requirePermission, requireStatusPermission } from '../auth/authorization.js';
 import { badRequest } from '../http/api-error.js';
 import { AchievementService } from '../achievements/achievement-service.js';
 import type { CreateAchievementInput, UpdateAchievementInput, AchievementListFilter } from '../achievements/achievement-service.js';
@@ -64,6 +64,7 @@ export async function adminAchievementsRoutes(app: FastifyInstance): Promise<voi
   const createGuard = requirePermission('REVIEW_CONTENT');
   const deleteGuard = requirePermission('REVIEW_CONTENT');
   const publishGuard = requirePermission('APPROVE_CONTENT');
+  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/achievements
@@ -155,7 +156,7 @@ export async function adminAchievementsRoutes(app: FastifyInstance): Promise<voi
   // ---------------------------------------------------------------------------
   app.post<{ Params: { id: string }; Body: StatusBody }>(
     '/api/v1/admin/achievements/:id/status',
-    { preHandler: [publishGuard] },
+    { preHandler: [statusGuard] },
     async (request) => {
       const { status, remarks } = request.body;
       if (!status) {

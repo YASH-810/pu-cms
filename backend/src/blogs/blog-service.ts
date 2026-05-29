@@ -138,6 +138,7 @@ export class BlogService {
           reading_time: readingTime,
           is_featured: input.isFeatured ?? false,
           is_pinned: input.isPinned ?? false,
+          status: 'draft',
           created_by: context.actorId,
           updated_by: context.actorId
         })
@@ -227,7 +228,6 @@ export class BlogService {
         .where({ id })
         .update({
           archived_at: trx.fn.now(),
-          deleted_at: trx.fn.now(),
           updated_at: trx.fn.now(),
           updated_by: context.actorId
         });
@@ -264,7 +264,6 @@ export class BlogService {
     if (status === 'published') update.published_at = this.db.fn.now();
     if (status === 'archived') {
       update.archived_at = this.db.fn.now();
-      update.deleted_at = this.db.fn.now();
     }
 
     const [updatedBlog] = await this.db('blogs')

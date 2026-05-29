@@ -40,20 +40,35 @@ import { AuthService } from '../../services/auth.service';
               </div>
             }
 
-            <button
-              type="button"
-              class="google-button"
-              [disabled]="isLoading()"
-              (click)="signInWithDev()"
-              id="dev-sign-in-btn"
-            >
-              @if (isLoading()) {
-                <div class="spinner"></div>
-                <span>Signing in…</span>
-              } @else {
-                <span>Sign in (Direct Dev Mode)</span>
-              }
-            </button>
+            <div class="button-group">
+              <button
+                type="button"
+                class="google-button"
+                [disabled]="isLoading()"
+                (click)="signInWithDev('yash@mes.ac.in')"
+              >
+                @if (isLoading()) {
+                  <div class="spinner"></div>
+                  <span>Signing in…</span>
+                } @else {
+                  <span>Sign in as Super Admin</span>
+                }
+              </button>
+
+              <button
+                type="button"
+                class="google-button secondary-btn"
+                [disabled]="isLoading()"
+                (click)="signInWithDev('editor@mes.ac.in')"
+              >
+                @if (isLoading()) {
+                  <div class="spinner"></div>
+                  <span>Signing in…</span>
+                } @else {
+                  <span>Sign in as Editor</span>
+                }
+              </button>
+            </div>
 
             <div class="domain-notice">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -267,7 +282,14 @@ import { AuthService } from '../../services/auth.service';
       box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
     }
 
-    /* === Google button === */
+    /* === Buttons === */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
     .google-button {
       display: flex;
       align-items: center;
@@ -316,6 +338,17 @@ import { AuthService } from '../../services/auth.service';
     .google-button:disabled {
       opacity: 0.7;
       cursor: not-allowed;
+    }
+
+    .secondary-btn {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+    
+    .secondary-btn:hover:not(:disabled) {
+      background: #f1f5f9;
+      color: #0f172a;
     }
 
     .google-icon {
@@ -396,8 +429,7 @@ export class LoginPage {
     window.location.href = '/api/v1/admin/auth/google/login';
   }
 
-  signInWithDev(): void {
-    const email = 'yash@mes.ac.in';
+  signInWithDev(email: string): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 

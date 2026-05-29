@@ -3,6 +3,8 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AchievementsService, Achievement, CreateAchievementPayload, UpdateAchievementPayload } from '../../services/achievements.service';
 import { OrganizationService, Organization } from '../../services/organization.service';
+import { AuthService } from '../../services/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
 type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'rejected';
@@ -35,173 +37,175 @@ const TYPES = ['academic', 'research', 'sports', 'cultural', 'community', 'other
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      <!-- ─── Page Header ──────────────────────────────────────────────────── -->
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Content</p>
-          <h1>University Achievements</h1>
-          <p>Highlight student, faculty, and institutional awards and accolades.</p>
-        </div>
-        <button type="button" class="primary-button" (click)="openCreateModal()">
-          + New Achievement
-        </button>
-      </header>
+      @if (!isEditor()) {
+        <!-- ─── Page Header ──────────────────────────────────────────────────── -->
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Content</p>
+            <h1>University Achievements</h1>
+            <p>Highlight student, faculty, and institutional awards and accolades.</p>
+          </div>
+          <button type="button" class="primary-button" (click)="openCreateModal()">
+            + New Achievement
+          </button>
+        </header>
 
-      <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
-      <div class="metric-grid">
-        <div class="metric-card">
-          <span>Total Achievements</span>
-          <strong>{{ total() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Published</span>
-          <strong class="published-count">{{ publishedCount() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Pending Review</span>
-          <strong class="review-count">{{ reviewCount() }}</strong>
-        </div>
-      </div>
-
-      <!-- ─── Filters ───────────────────────────────────────────────────────── -->
-      <div class="data-card">
-        <div class="card-toolbar">
-          <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
-            <label class="search-field">
-              <input
-                type="search"
-                placeholder="Search achievements by title, slug or awarded by…"
-                [(ngModel)]="searchTerm"
-                (ngModelChange)="onSearch()"
-                id="achievements-search"
-              />
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="statusFilter" (ngModelChange)="loadAchievements()" id="achievements-status-filter">
-                <option value="">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="review">In Review</option>
-                <option value="published">Published</option>
-                <option value="rejected">Rejected</option>
-                <option value="archived">Archived</option>
-              </select>
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="levelFilter" (ngModelChange)="loadAchievements()" id="achievements-level-filter">
-                <option value="">All Levels</option>
-                @for (l of levels; track l) {
-                  <option [value]="l">{{ l | titlecase }}</option>
-                }
-              </select>
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="typeFilter" (ngModelChange)="loadAchievements()" id="achievements-type-filter">
-                <option value="">All Types</option>
-                @for (t of types; track t) {
-                  <option [value]="t">{{ t | titlecase }}</option>
-                }
-              </select>
-            </label>
+        <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Total Achievements</span>
+            <strong>{{ total() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Published</span>
+            <strong class="published-count">{{ publishedCount() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Pending Review</span>
+            <strong class="review-count">{{ reviewCount() }}</strong>
           </div>
         </div>
 
-        <!-- ─── Table ─────────────────────────────────────────────────────── -->
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Achievement</th>
-                <th>Type</th>
-                <th>Level</th>
-                <th>Awarded By / Date</th>
-                <th>Prize</th>
-                <th>Status</th>
-                <th>Featured</th>
-                <th class="right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (loading()) {
-                <tr>
-                  <td colspan="8" class="empty-cell">Loading achievements…</td>
-                </tr>
-              } @else if (achievements().length === 0) {
-                <tr>
-                  <td colspan="8" class="empty-cell">
-                    No achievements found.
-                    <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Add achievement</button>
-                  </td>
-                </tr>
-              } @else {
-                @for (ac of achievements(); track ac.id) {
-                  <tr>
-                    <td>
-                      <div class="page-cell">
-                        <strong>{{ ac.title }}</strong>
-                        <span class="muted font-mono" style="font-size:0.76rem">{{ ac.slug }}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="pill pill-draft">{{ ac.achievement_type | titlecase }}</span>
-                    </td>
-                    <td>{{ ac.level | titlecase }}</td>
-                    <td>
-                      <div style="font-size:0.84rem">
-                        <div>By: {{ ac.awarded_by }}</div>
-                        <div class="muted">Date: {{ ac.awarded_at | date:'dd MMM yyyy' }}</div>
-                      </div>
-                    </td>
-                    <td>
-                      @if (ac.prize_amount) {
-                        {{ ac.prize_amount | currency:'INR':'symbol':'1.0-0' }}
-                      } @else {
-                        <span class="muted">—</span>
-                      }
-                    </td>
-                    <td>
-                      <span class="pill" [ngClass]="statusClass(ac.status)">{{ ac.status }}</span>
-                    </td>
-                    <td>
-                      @if (ac.is_featured) {
-                        <span class="pill pill-active">Featured</span>
-                      } @else {
-                        <span class="muted">—</span>
-                      }
-                    </td>
-                    <td class="right">
-                      <div class="row-actions">
-                        <button type="button" class="ghost-button" (click)="openEditModal(ac)" [id]="'edit-achievement-' + ac.id">Edit</button>
-                        @for (action of availableActions(ac.status); track action) {
-                          <button
-                            type="button"
-                            [class]="workflowClass(action)"
-                            (click)="openStatusModal(ac, action)"
-                            [id]="'action-' + action + '-' + ac.id"
-                          >{{ workflowLabel(action) }}</button>
-                        }
-                        @if (ac.status !== 'archived') {
-                          <button type="button" class="danger-button" (click)="confirmDelete(ac)" [id]="'delete-achievement-' + ac.id">Archive</button>
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- ─── Pagination ────────────────────────────────────────────────── -->
-        @if (total() > pageSize) {
-          <div class="table-footer">
-            <span>Showing {{ achievements().length }} of {{ total() }} achievements</span>
-            <div style="display:flex;gap:8px">
-              <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
-              <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+        <!-- ─── Filters ───────────────────────────────────────────────────────── -->
+        <div class="data-card">
+          <div class="card-toolbar">
+            <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
+              <label class="search-field">
+                <input
+                  type="search"
+                  placeholder="Search achievements by title, slug or awarded by…"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="onSearch()"
+                  id="achievements-search"
+                />
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="statusFilter" (ngModelChange)="loadAchievements()" id="achievements-status-filter">
+                  <option value="">All Statuses</option>
+                  <option value="draft">Draft</option>
+                  <option value="review">In Review</option>
+                  <option value="published">Published</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="levelFilter" (ngModelChange)="loadAchievements()" id="achievements-level-filter">
+                  <option value="">All Levels</option>
+                  @for (l of levels; track l) {
+                    <option [value]="l">{{ l | titlecase }}</option>
+                  }
+                </select>
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="typeFilter" (ngModelChange)="loadAchievements()" id="achievements-type-filter">
+                  <option value="">All Types</option>
+                  @for (t of types; track t) {
+                    <option [value]="t">{{ t | titlecase }}</option>
+                  }
+                </select>
+              </label>
             </div>
           </div>
-        }
-      </div>
+
+          <!-- ─── Table ─────────────────────────────────────────────────────── -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Achievement</th>
+                  <th>Type</th>
+                  <th>Level</th>
+                  <th>Awarded By / Date</th>
+                  <th>Prize</th>
+                  <th>Status</th>
+                  <th>Featured</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (loading()) {
+                  <tr>
+                    <td colspan="8" class="empty-cell">Loading achievements…</td>
+                  </tr>
+                } @else if (achievements().length === 0) {
+                  <tr>
+                    <td colspan="8" class="empty-cell">
+                      No achievements found.
+                      <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Add achievement</button>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (ac of achievements(); track ac.id) {
+                    <tr>
+                      <td>
+                        <div class="page-cell">
+                          <strong>{{ ac.title }}</strong>
+                          <span class="muted font-mono" style="font-size:0.76rem">{{ ac.slug }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="pill pill-draft">{{ ac.achievement_type | titlecase }}</span>
+                      </td>
+                      <td>{{ ac.level | titlecase }}</td>
+                      <td>
+                        <div style="font-size:0.84rem">
+                          <div>By: {{ ac.awarded_by }}</div>
+                          <div class="muted">Date: {{ ac.awarded_at | date:'dd MMM yyyy' }}</div>
+                        </div>
+                      </td>
+                      <td>
+                        @if (ac.prize_amount) {
+                          {{ ac.prize_amount | currency:'INR':'symbol':'1.0-0' }}
+                        } @else {
+                          <span class="muted">—</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="pill" [ngClass]="statusClass(ac.status)">{{ ac.status }}</span>
+                      </td>
+                      <td>
+                        @if (ac.is_featured) {
+                          <span class="pill pill-active">Featured</span>
+                        } @else {
+                          <span class="muted">—</span>
+                        }
+                      </td>
+                      <td class="right">
+                        <div class="row-actions">
+                          <button type="button" class="ghost-button" (click)="openEditModal(ac)" [id]="'edit-achievement-' + ac.id">Edit</button>
+                          @for (action of availableActions(ac.status); track action) {
+                            <button
+                              type="button"
+                              [class]="workflowClass(action)"
+                              (click)="openStatusModal(ac, action)"
+                              [id]="'action-' + action + '-' + ac.id"
+                            >{{ workflowLabel(action) }}</button>
+                          }
+                          @if (ac.status !== 'archived') {
+                            <button type="button" class="danger-button" (click)="confirmDelete(ac)" [id]="'delete-achievement-' + ac.id">Archive</button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ─── Pagination ────────────────────────────────────────────────── -->
+          @if (total() > pageSize) {
+            <div class="table-footer">
+              <span>Showing {{ achievements().length }} of {{ total() }} achievements</span>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
+                <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -400,6 +404,14 @@ export class AdminAchievements implements OnInit {
   private readonly achievementsService = inject(AchievementsService);
   private readonly orgService = inject(OrganizationService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  readonly isEditor = computed(() => {
+    const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
+    return !roles.includes('SUPER_ADMIN') && !roles.includes('UNIVERSITY_ADMIN');
+  });
 
   // ─── State ────────────────────────────────────────────────────────────────
   achievements  = signal<Achievement[]>([]);
@@ -457,6 +469,17 @@ export class AdminAchievements implements OnInit {
     this.loadAchievements();
     this.loadMetadata();
     this.loadMetrics();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['create']) {
+        this.openCreateModal();
+      } else if (params['edit']) {
+        this.achievementsService.getAchievement(params['edit']).subscribe({
+          next: (ac) => this.openEditModal(ac),
+          error: (err) => this.toast.error('Error', 'Failed to load achievement for editing')
+        });
+      }
+    });
   }
 
   loadAchievements() {
@@ -539,7 +562,12 @@ export class AdminAchievements implements OnInit {
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { this.showFormModal.set(false); }
+  closeFormModal() { 
+    this.showFormModal.set(false); 
+    if (this.isEditor()) {
+      this.router.navigate(['/admin/content']);
+    }
+  }
 
   onTitleChange(title: string) {
     if (!this.isEditMode()) {

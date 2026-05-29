@@ -267,6 +267,51 @@ export class ContentService {
     return created;
   }
 
+  public async listEntities(
+    filters: { status?: string; authorId?: string; limit?: number; offset?: number; search?: string }
+  ) {
+    const query = this.db('content_entities as ce')
+      .join('content_types as ct', 'ce.content_type_id', 'ct.id')
+      .leftJoin('users as u', 'ce.created_by', 'u.id')
+      .select(
+        'ce.id',
+        'ce.title',
+        'ce.slug',
+        'ce.status',
+        'ce.updated_at',
+        'ce.created_by as author_id',
+        'ct.slug as type_slug',
+        'ct.name as type_name',
+        'u.full_name as author_name'
+      )
+      .whereNull('ce.deleted_at')
+      .whereNull('ct.deleted_at');
+
+    if (filters.status) {
+      query.where('ce.status', filters.status);
+    }
+    if (filters.authorId) {
+      query.where('ce.created_by', filters.authorId);
+    }
+    if (filters.search) {
+      query.where((q) => {
+        q.whereILike('ce.title', `%${filters.search}%`)
+         .orWhereILike('ce.slug', `%${filters.search}%`);
+      });
+    }
+
+    const countQuery = query.clone().clearSelect().count('* as total').first();
+
+    const limit = filters.limit ?? 20;
+    const offset = filters.offset ?? 0;
+    query.orderBy('ce.updated_at', 'desc').limit(limit).offset(offset);
+
+    const [rows, countRow] = await Promise.all([query, countQuery]);
+    const total = Number((countRow as any)?.total || 0);
+
+    return { data: rows, total };
+  }
+
   private async resolveContentType(slug: string): Promise<ContentTypeRow> {
     const contentType = await this.db('content_types')
       .select('id', 'slug', 'table_name')

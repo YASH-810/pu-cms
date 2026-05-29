@@ -12,6 +12,7 @@ import { AdminAchievements } from './components/admin-achievements/admin-achieve
 import { AdminStories } from './components/admin-stories/admin-stories';
 import { AdminClubs } from './components/admin-clubs/admin-clubs';
 import { AdminNotifications } from './components/admin-notifications/admin-notifications';
+import { AdminUnifiedContent } from './components/admin-unified-content/admin-unified-content';
 import { LoginPage } from './components/login/login';
 import { authGuard } from './guards/auth.guard';
 
@@ -38,6 +39,26 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: AdminDashboard
+      },
+      {
+        path: 'content',
+        component: AdminUnifiedContent,
+        data: { view: 'all' }
+      },
+      {
+        path: 'review-queue',
+        component: AdminUnifiedContent,
+        data: { view: 'review' }
+      },
+      {
+        path: 'published',
+        component: AdminUnifiedContent,
+        data: { view: 'published' }
+      },
+      {
+        path: 'archived',
+        component: AdminUnifiedContent,
+        data: { view: 'archived' }
       },
       {
         path: 'users',

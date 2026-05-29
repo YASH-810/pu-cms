@@ -3,6 +3,8 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StoriesService, Story, CreateStoryPayload, UpdateStoryPayload } from '../../services/stories.service';
 import { OrganizationService, Organization } from '../../services/organization.service';
+import { AuthService } from '../../services/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
 type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'rejected';
@@ -47,173 +49,175 @@ export class ReplaceUnderscoresPipe implements PipeTransform {
   imports: [CommonModule, FormsModule, ReplaceUnderscoresPipe],
   template: `
     <section class="page">
-      <!-- ─── Page Header ──────────────────────────────────────────────────── -->
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Content</p>
-          <h1>University Stories</h1>
-          <p>Highlight student success stories, alumni profiles, and research spotlights.</p>
-        </div>
-        <button type="button" class="primary-button" (click)="openCreateModal()">
-          + New Story
-        </button>
-      </header>
+      @if (!isEditor()) {
+        <!-- ─── Page Header ──────────────────────────────────────────────────── -->
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Content</p>
+            <h1>University Stories</h1>
+            <p>Highlight student success stories, alumni profiles, and research spotlights.</p>
+          </div>
+          <button type="button" class="primary-button" (click)="openCreateModal()">
+            + New Story
+          </button>
+        </header>
 
-      <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
-      <div class="metric-grid">
-        <div class="metric-card">
-          <span>Total Stories</span>
-          <strong>{{ total() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Published</span>
-          <strong class="published-count">{{ publishedCount() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Pending Review</span>
-          <strong class="review-count">{{ reviewCount() }}</strong>
-        </div>
-      </div>
-
-      <!-- ─── Filters ───────────────────────────────────────────────────────── -->
-      <div class="data-card">
-        <div class="card-toolbar">
-          <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
-            <label class="search-field">
-              <input
-                type="search"
-                placeholder="Search stories by title, slug or person name…"
-                [(ngModel)]="searchTerm"
-                (ngModelChange)="onSearch()"
-                id="stories-search"
-              />
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="statusFilter" (ngModelChange)="loadStories()" id="stories-status-filter">
-                <option value="">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="review">In Review</option>
-                <option value="published">Published</option>
-                <option value="rejected">Rejected</option>
-                <option value="archived">Archived</option>
-              </select>
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="roleFilter" (ngModelChange)="loadStories()" id="stories-role-filter">
-                <option value="">All Roles</option>
-                @for (r of roles; track r) {
-                  <option [value]="r">{{ r | titlecase }}</option>
-                }
-              </select>
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="typeFilter" (ngModelChange)="loadStories()" id="stories-type-filter">
-                <option value="">All Types</option>
-                @for (t of types; track t) {
-                  <option [value]="t">{{ t | titlecase | replaceUnderscores }}</option>
-                }
-              </select>
-            </label>
+        <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Total Stories</span>
+            <strong>{{ total() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Published</span>
+            <strong class="published-count">{{ publishedCount() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Pending Review</span>
+            <strong class="review-count">{{ reviewCount() }}</strong>
           </div>
         </div>
 
-        <!-- ─── Table ─────────────────────────────────────────────────────── -->
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Story Title</th>
-                <th>Person Name</th>
-                <th>Role</th>
-                <th>Affiliation / Year</th>
-                <th>LinkedIn</th>
-                <th>Status</th>
-                <th>Featured</th>
-                <th class="right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (loading()) {
-                <tr>
-                  <td colspan="8" class="empty-cell">Loading stories…</td>
-                </tr>
-              } @else if (stories().length === 0) {
-                <tr>
-                  <td colspan="8" class="empty-cell">
-                    No stories found.
-                    <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Write first story</button>
-                  </td>
-                </tr>
-              } @else {
-                @for (st of stories(); track st.id) {
-                  <tr>
-                    <td>
-                      <div class="page-cell">
-                        <strong>{{ st.title }}</strong>
-                        <span class="muted font-mono" style="font-size:0.76rem">{{ st.slug }}</span>
-                      </div>
-                    </td>
-                    <td>{{ st.person_name }}</td>
-                    <td>
-                      <span class="pill pill-draft">{{ st.person_role | titlecase }}</span>
-                    </td>
-                    <td>
-                      <div style="font-size:0.84rem">
-                        <div>{{ st.company || '—' }}</div>
-                        <div class="muted">Grad: {{ st.graduation_year || '—' }}</div>
-                      </div>
-                    </td>
-                    <td>
-                      @if (st.linkedin_url) {
-                        <a [href]="st.linkedin_url" target="_blank" class="font-mono" style="font-size:0.82rem;color:var(--primary-red)">Profile ↗</a>
-                      } @else {
-                        <span class="muted">—</span>
-                      }
-                    </td>
-                    <td>
-                      <span class="pill" [ngClass]="statusClass(st.status)">{{ st.status }}</span>
-                    </td>
-                    <td>
-                      @if (st.is_featured) {
-                        <span class="pill pill-active">Featured</span>
-                      } @else {
-                        <span class="muted">—</span>
-                      }
-                    </td>
-                    <td class="right">
-                      <div class="row-actions">
-                        <button type="button" class="ghost-button" (click)="openEditModal(st)" [id]="'edit-story-' + st.id">Edit</button>
-                        @for (action of availableActions(st.status); track action) {
-                          <button
-                            type="button"
-                            [class]="workflowClass(action)"
-                            (click)="openStatusModal(st, action)"
-                            [id]="'action-' + action + '-' + st.id"
-                          >{{ workflowLabel(action) }}</button>
-                        }
-                        @if (st.status !== 'archived') {
-                          <button type="button" class="danger-button" (click)="confirmDelete(st)" [id]="'delete-story-' + st.id">Archive</button>
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- ─── Pagination ────────────────────────────────────────────────── -->
-        @if (total() > pageSize) {
-          <div class="table-footer">
-            <span>Showing {{ stories().length }} of {{ total() }} stories</span>
-            <div style="display:flex;gap:8px">
-              <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
-              <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+        <!-- ─── Filters ───────────────────────────────────────────────────────── -->
+        <div class="data-card">
+          <div class="card-toolbar">
+            <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
+              <label class="search-field">
+                <input
+                  type="search"
+                  placeholder="Search stories by title, slug or person name…"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="onSearch()"
+                  id="stories-search"
+                />
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="statusFilter" (ngModelChange)="loadStories()" id="stories-status-filter">
+                  <option value="">All Statuses</option>
+                  <option value="draft">Draft</option>
+                  <option value="review">In Review</option>
+                  <option value="published">Published</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="roleFilter" (ngModelChange)="loadStories()" id="stories-role-filter">
+                  <option value="">All Roles</option>
+                  @for (r of roles; track r) {
+                    <option [value]="r">{{ r | titlecase }}</option>
+                  }
+                </select>
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="typeFilter" (ngModelChange)="loadStories()" id="stories-type-filter">
+                  <option value="">All Types</option>
+                  @for (t of types; track t) {
+                    <option [value]="t">{{ t | titlecase | replaceUnderscores }}</option>
+                  }
+                </select>
+              </label>
             </div>
           </div>
-        }
-      </div>
+
+          <!-- ─── Table ─────────────────────────────────────────────────────── -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Story Title</th>
+                  <th>Person Name</th>
+                  <th>Role</th>
+                  <th>Affiliation / Year</th>
+                  <th>LinkedIn</th>
+                  <th>Status</th>
+                  <th>Featured</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (loading()) {
+                  <tr>
+                    <td colspan="8" class="empty-cell">Loading stories…</td>
+                  </tr>
+                } @else if (stories().length === 0) {
+                  <tr>
+                    <td colspan="8" class="empty-cell">
+                      No stories found.
+                      <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Write first story</button>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (st of stories(); track st.id) {
+                    <tr>
+                      <td>
+                        <div class="page-cell">
+                          <strong>{{ st.title }}</strong>
+                          <span class="muted font-mono" style="font-size:0.76rem">{{ st.slug }}</span>
+                        </div>
+                      </td>
+                      <td>{{ st.person_name }}</td>
+                      <td>
+                        <span class="pill pill-draft">{{ st.person_role | titlecase }}</span>
+                      </td>
+                      <td>
+                        <div style="font-size:0.84rem">
+                          <div>{{ st.company || '—' }}</div>
+                          <div class="muted">Grad: {{ st.graduation_year || '—' }}</div>
+                        </div>
+                      </td>
+                      <td>
+                        @if (st.linkedin_url) {
+                          <a [href]="st.linkedin_url" target="_blank" class="font-mono" style="font-size:0.82rem;color:var(--primary-red)">Profile ↗</a>
+                        } @else {
+                          <span class="muted">—</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="pill" [ngClass]="statusClass(st.status)">{{ st.status }}</span>
+                      </td>
+                      <td>
+                        @if (st.is_featured) {
+                          <span class="pill pill-active">Featured</span>
+                        } @else {
+                          <span class="muted">—</span>
+                        }
+                      </td>
+                      <td class="right">
+                        <div class="row-actions">
+                          <button type="button" class="ghost-button" (click)="openEditModal(st)" [id]="'edit-story-' + st.id">Edit</button>
+                          @for (action of availableActions(st.status); track action) {
+                            <button
+                              type="button"
+                              [class]="workflowClass(action)"
+                              (click)="openStatusModal(st, action)"
+                              [id]="'action-' + action + '-' + st.id"
+                            >{{ workflowLabel(action) }}</button>
+                          }
+                          @if (st.status !== 'archived') {
+                            <button type="button" class="danger-button" (click)="confirmDelete(st)" [id]="'delete-story-' + st.id">Archive</button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ─── Pagination ────────────────────────────────────────────────── -->
+          @if (total() > pageSize) {
+            <div class="table-footer">
+              <span>Showing {{ stories().length }} of {{ total() }} stories</span>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
+                <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -431,6 +435,14 @@ export class AdminStories implements OnInit {
   private readonly storiesService = inject(StoriesService);
   private readonly orgService = inject(OrganizationService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  readonly isEditor = computed(() => {
+    const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
+    return !roles.includes('SUPER_ADMIN') && !roles.includes('UNIVERSITY_ADMIN');
+  });
 
   // ─── State ────────────────────────────────────────────────────────────────
   stories       = signal<Story[]>([]);
@@ -489,6 +501,17 @@ export class AdminStories implements OnInit {
     this.loadStories();
     this.loadMetadata();
     this.loadMetrics();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['create']) {
+        this.openCreateModal();
+      } else if (params['edit']) {
+        this.storiesService.getStory(params['edit']).subscribe({
+          next: (st) => this.openEditModal(st),
+          error: (err) => this.toast.error('Error', 'Failed to load story for editing')
+        });
+      }
+    });
   }
 
   loadStories() {
@@ -570,7 +593,12 @@ export class AdminStories implements OnInit {
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { this.showFormModal.set(false); }
+  closeFormModal() { 
+    this.showFormModal.set(false); 
+    if (this.isEditor()) {
+      this.router.navigate(['/admin/content']);
+    }
+  }
 
   onTitleChange(title: string) {
     if (!this.isEditMode()) {

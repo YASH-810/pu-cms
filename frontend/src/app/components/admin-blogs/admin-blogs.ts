@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Blog, BlogsService, CreateBlogPayload, UpdateBlogPayload } from '../../services/blogs.service';
 import { UserService, User } from '../../services/user.service';
 import { OrganizationService, Organization } from '../../services/organization.service';
+import { AuthService } from '../../services/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
 type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'rejected';
@@ -35,152 +37,154 @@ function availableActions(status: string): WorkflowAction[] {
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      <!-- ─── Page Header ──────────────────────────────────────────────────── -->
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Content</p>
-          <h1>Blogs &amp; News</h1>
-          <p>Create, manage, and publish news articles and institutional blogs.</p>
-        </div>
-        <button type="button" class="primary-button" (click)="openCreateModal()">
-          + New Article
-        </button>
-      </header>
+      @if (!isEditor()) {
+        <!-- ─── Page Header ──────────────────────────────────────────────────── -->
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Content</p>
+            <h1>Blogs &amp; News</h1>
+            <p>Create, manage, and publish news articles and institutional blogs.</p>
+          </div>
+          <button type="button" class="primary-button" (click)="openCreateModal()">
+            + New Article
+          </button>
+        </header>
 
-      <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
-      <div class="metric-grid">
-        <div class="metric-card">
-          <span>Total Articles</span>
-          <strong>{{ total() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Published</span>
-          <strong class="published-count">{{ publishedCount() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Pending Review</span>
-          <strong class="review-count">{{ reviewCount() }}</strong>
-        </div>
-      </div>
-
-      <!-- ─── Filters ───────────────────────────────────────────────────────── -->
-      <div class="data-card">
-        <div class="card-toolbar">
-          <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
-            <label class="search-field">
-              <input
-                type="search"
-                placeholder="Search articles by title or slug…"
-                [(ngModel)]="searchTerm"
-                (ngModelChange)="onSearch()"
-                id="blogs-search"
-              />
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="statusFilter" (ngModelChange)="loadBlogs()" id="blogs-status-filter">
-                <option value="">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="review">In Review</option>
-                <option value="published">Published</option>
-                <option value="rejected">Rejected</option>
-                <option value="archived">Archived</option>
-              </select>
-            </label>
+        <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Total Articles</span>
+            <strong>{{ total() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Published</span>
+            <strong class="published-count">{{ publishedCount() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Pending Review</span>
+            <strong class="review-count">{{ reviewCount() }}</strong>
           </div>
         </div>
 
-        <!-- ─── Table ─────────────────────────────────────────────────────── -->
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Article</th>
-                <th>Author</th>
-                <th>Status</th>
-                <th>Read Time</th>
-                <th>Pinned / Featured</th>
-                <th>Updated</th>
-                <th class="right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (loading()) {
-                <tr>
-                  <td colspan="7" class="empty-cell">Loading articles…</td>
-                </tr>
-              } @else if (blogs().length === 0) {
-                <tr>
-                  <td colspan="7" class="empty-cell">
-                    No articles found.
-                    <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Create your first article</button>
-                  </td>
-                </tr>
-              } @else {
-                @for (blog of blogs(); track blog.id) {
-                  <tr>
-                    <td>
-                      <div class="page-cell">
-                        <strong>{{ blog.title }}</strong>
-                        <span class="muted font-mono" style="font-size:0.76rem">{{ blog.slug }}</span>
-                      </div>
-                    </td>
-                    <td>
-                      {{ blog.author_name || 'System' }}
-                    </td>
-                    <td>
-                      <span class="pill" [ngClass]="statusClass(blog.status)">{{ blog.status }}</span>
-                    </td>
-                    <td>{{ blog.reading_time }} min</td>
-                    <td>
-                      <div style="display:flex;gap:6px">
-                        @if (blog.is_pinned) {
-                          <span class="pill pill-pinned">Pinned</span>
-                        }
-                        @if (blog.is_featured) {
-                          <span class="pill pill-active">Featured</span>
-                        }
-                        @if (!blog.is_pinned && !blog.is_featured) {
-                          <span class="muted">—</span>
-                        }
-                      </div>
-                    </td>
-                    <td>
-                      <span class="muted">{{ blog.updated_at | date:'dd MMM yyyy' }}</span>
-                    </td>
-                    <td class="right">
-                      <div class="row-actions">
-                        <button type="button" class="ghost-button" (click)="openEditModal(blog)" [id]="'edit-blog-' + blog.id">Edit</button>
-                        @for (action of availableActions(blog.status); track action) {
-                          <button
-                            type="button"
-                            [class]="workflowClass(action)"
-                            (click)="openStatusModal(blog, action)"
-                            [id]="'action-' + action + '-' + blog.id"
-                          >{{ workflowLabel(action) }}</button>
-                        }
-                        @if (blog.status !== 'archived') {
-                          <button type="button" class="danger-button" (click)="confirmDelete(blog)" [id]="'delete-blog-' + blog.id">Archive</button>
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- ─── Pagination ────────────────────────────────────────────────── -->
-        @if (total() > pageSize) {
-          <div class="table-footer">
-            <span>Showing {{ blogs().length }} of {{ total() }} articles</span>
-            <div style="display:flex;gap:8px">
-              <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
-              <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+        <!-- ─── Filters ───────────────────────────────────────────────────────── -->
+        <div class="data-card">
+          <div class="card-toolbar">
+            <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
+              <label class="search-field">
+                <input
+                  type="search"
+                  placeholder="Search articles by title or slug…"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="onSearch()"
+                  id="blogs-search"
+                />
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="statusFilter" (ngModelChange)="loadBlogs()" id="blogs-status-filter">
+                  <option value="">All Statuses</option>
+                  <option value="draft">Draft</option>
+                  <option value="review">In Review</option>
+                  <option value="published">Published</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
             </div>
           </div>
-        }
-      </div>
+
+          <!-- ─── Table ─────────────────────────────────────────────────────── -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Article</th>
+                  <th>Author</th>
+                  <th>Status</th>
+                  <th>Read Time</th>
+                  <th>Pinned / Featured</th>
+                  <th>Updated</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (loading()) {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Loading articles…</td>
+                  </tr>
+                } @else if (blogs().length === 0) {
+                  <tr>
+                    <td colspan="7" class="empty-cell">
+                      No articles found.
+                      <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Create your first article</button>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (blog of blogs(); track blog.id) {
+                    <tr>
+                      <td>
+                        <div class="page-cell">
+                          <strong>{{ blog.title }}</strong>
+                          <span class="muted font-mono" style="font-size:0.76rem">{{ blog.slug }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        {{ blog.author_name || 'System' }}
+                      </td>
+                      <td>
+                        <span class="pill" [ngClass]="statusClass(blog.status)">{{ blog.status }}</span>
+                      </td>
+                      <td>{{ blog.reading_time }} min</td>
+                      <td>
+                        <div style="display:flex;gap:6px">
+                          @if (blog.is_pinned) {
+                            <span class="pill pill-pinned">Pinned</span>
+                          }
+                          @if (blog.is_featured) {
+                            <span class="pill pill-active">Featured</span>
+                          }
+                          @if (!blog.is_pinned && !blog.is_featured) {
+                            <span class="muted">—</span>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <span class="muted">{{ blog.updated_at | date:'dd MMM yyyy' }}</span>
+                      </td>
+                      <td class="right">
+                        <div class="row-actions">
+                          <button type="button" class="ghost-button" (click)="openEditModal(blog)" [id]="'edit-blog-' + blog.id">Edit</button>
+                          @for (action of availableActions(blog.status); track action) {
+                            <button
+                              type="button"
+                              [class]="workflowClass(action)"
+                              (click)="openStatusModal(blog, action)"
+                              [id]="'action-' + action + '-' + blog.id"
+                            >{{ workflowLabel(action) }}</button>
+                          }
+                          @if (blog.status !== 'archived') {
+                            <button type="button" class="danger-button" (click)="confirmDelete(blog)" [id]="'delete-blog-' + blog.id">Archive</button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ─── Pagination ────────────────────────────────────────────────── -->
+          @if (total() > pageSize) {
+            <div class="table-footer">
+              <span>Showing {{ blogs().length }} of {{ total() }} articles</span>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
+                <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -375,6 +379,14 @@ export class AdminBlogs implements OnInit {
   private readonly userService = inject(UserService);
   private readonly orgService = inject(OrganizationService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  readonly isEditor = computed(() => {
+    const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
+    return !roles.includes('SUPER_ADMIN') && !roles.includes('UNIVERSITY_ADMIN');
+  });
 
   // ─── State ────────────────────────────────────────────────────────────────
   blogs         = signal<Blog[]>([]);
@@ -429,6 +441,17 @@ export class AdminBlogs implements OnInit {
     this.loadBlogs();
     this.loadMetrics();
     this.loadMetadataOptions();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['create']) {
+        this.openCreateModal();
+      } else if (params['edit']) {
+        this.blogsService.getBlog(params['edit']).subscribe({
+          next: (blog) => this.openEditModal(blog),
+          error: (err) => this.toast.error('Error', 'Failed to load article for editing')
+        });
+      }
+    });
   }
 
   loadBlogs() {
@@ -509,7 +532,12 @@ export class AdminBlogs implements OnInit {
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { this.showFormModal.set(false); }
+  closeFormModal() { 
+    this.showFormModal.set(false); 
+    if (this.isEditor()) {
+      this.router.navigate(['/admin/content']);
+    }
+  }
 
   onTitleChange(title: string) {
     if (!this.isEditMode()) {

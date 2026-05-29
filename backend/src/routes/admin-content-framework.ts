@@ -123,4 +123,19 @@ export async function adminContentFrameworkRoutes(app: FastifyInstance): Promise
       await getActorContext(request)
     );
   });
+
+  app.get<{ Querystring: { status?: string; author_id?: string; limit?: number; offset?: number; search?: string } }>(
+    '/api/v1/admin/content',
+    { preHandler: [guard] },
+    async (request) => {
+      const service = new ContentService(request.server.db);
+      return service.listEntities({
+        status: request.query.status,
+        authorId: request.query.author_id,
+        limit: request.query.limit,
+        offset: request.query.offset,
+        search: request.query.search
+      });
+    }
+  );
 }

@@ -3,6 +3,8 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AnnouncementsService, Announcement, AnnouncementType, CreateAnnouncementPayload, UpdateAnnouncementPayload } from '../../services/announcements.service';
 import { OrganizationService, Organization } from '../../services/organization.service';
+import { AuthService } from '../../services/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
 type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'rejected';
@@ -34,169 +36,171 @@ const PRIORITIES = ['low', 'medium', 'high', 'critical'];
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      <!-- ─── Page Header ──────────────────────────────────────────────────── -->
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Content</p>
-          <h1>University Announcements</h1>
-          <p>Create and manage general notices, PDF circulars, and rich content announcements.</p>
-        </div>
-        <button type="button" class="primary-button" (click)="openCreateModal()">
-          + New Announcement
-        </button>
-      </header>
+      @if (!isEditor()) {
+        <!-- ─── Page Header ──────────────────────────────────────────────────── -->
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Content</p>
+            <h1>University Announcements</h1>
+            <p>Create and manage general notices, PDF circulars, and rich content announcements.</p>
+          </div>
+          <button type="button" class="primary-button" (click)="openCreateModal()">
+            + New Announcement
+          </button>
+        </header>
 
-      <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
-      <div class="metric-grid">
-        <div class="metric-card">
-          <span>Total Announcements</span>
-          <strong>{{ total() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Published</span>
-          <strong class="published-count">{{ publishedCount() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Pending Review</span>
-          <strong class="review-count">{{ reviewCount() }}</strong>
-        </div>
-      </div>
-
-      <!-- ─── Filters ───────────────────────────────────────────────────────── -->
-      <div class="data-card">
-        <div class="card-toolbar">
-          <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
-            <label class="search-field">
-              <input
-                type="search"
-                placeholder="Search announcements by title or slug…"
-                [(ngModel)]="searchTerm"
-                (ngModelChange)="onSearch()"
-                id="announcements-search"
-              />
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="statusFilter" (ngModelChange)="loadAnnouncements()" id="announcements-status-filter">
-                <option value="">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="review">In Review</option>
-                <option value="published">Published</option>
-                <option value="rejected">Rejected</option>
-                <option value="archived">Archived</option>
-              </select>
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="typeFilter" (ngModelChange)="loadAnnouncements()" id="announcements-type-filter">
-                <option value="">All Types</option>
-                @for (t of announcementTypes(); track t.id) {
-                  <option [value]="t.id">{{ t.name }}</option>
-                }
-              </select>
-            </label>
-            <label class="select-field">
-              <select [(ngModel)]="priorityFilter" (ngModelChange)="loadAnnouncements()" id="announcements-priority-filter">
-                <option value="">All Priorities</option>
-                @for (p of priorities; track p) {
-                  <option [value]="p">{{ p | titlecase }}</option>
-                }
-              </select>
-            </label>
+        <!-- ─── Metrics ──────────────────────────────────────────────────────── -->
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Total Announcements</span>
+            <strong>{{ total() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Published</span>
+            <strong class="published-count">{{ publishedCount() }}</strong>
+          </div>
+          <div class="metric-card">
+            <span>Pending Review</span>
+            <strong class="review-count">{{ reviewCount() }}</strong>
           </div>
         </div>
 
-        <!-- ─── Table ─────────────────────────────────────────────────────── -->
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Announcement</th>
-                <th>Type</th>
-                <th>Priority</th>
-                <th>Validity Range</th>
-                <th>Status</th>
-                <th>Updated</th>
-                <th class="right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (loading()) {
-                <tr>
-                  <td colspan="7" class="empty-cell">Loading announcements…</td>
-                </tr>
-              } @else if (announcements().length === 0) {
-                <tr>
-                  <td colspan="7" class="empty-cell">
-                    No announcements found.
-                    <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Create one now</button>
-                  </td>
-                </tr>
-              } @else {
-                @for (ann of announcements(); track ann.id) {
-                  <tr>
-                    <td>
-                      <div class="page-cell">
-                        <strong>{{ ann.title }}</strong>
-                        <span class="muted font-mono" style="font-size:0.76rem">{{ ann.slug }}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="pill pill-draft">{{ ann.announcement_type_name }}</span>
-                    </td>
-                    <td>
-                      <span [class]="priorityClass(ann.priority)">{{ ann.priority | uppercase }}</span>
-                    </td>
-                    <td>
-                      <div style="font-size:0.84rem">
-                        <div>From: {{ ann.valid_from | date:'dd MMM yyyy, HH:mm' }}</div>
-                        <div class="muted">
-                          @if (ann.valid_until) {
-                            Until: {{ ann.valid_until | date:'dd MMM yyyy, HH:mm' }}
-                          } @else {
-                            Until: Permanent
-                          }
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="pill" [ngClass]="statusClass(ann.status)">{{ ann.status }}</span>
-                    </td>
-                    <td>
-                      <span class="muted">{{ ann.updated_at | date:'dd MMM yyyy' }}</span>
-                    </td>
-                    <td class="right">
-                      <div class="row-actions">
-                        <button type="button" class="ghost-button" (click)="openEditModal(ann)" [id]="'edit-announcement-' + ann.id">Edit</button>
-                        @for (action of availableActions(ann.status); track action) {
-                          <button
-                            type="button"
-                            [class]="workflowClass(action)"
-                            (click)="openStatusModal(ann, action)"
-                            [id]="'action-' + action + '-' + ann.id"
-                          >{{ workflowLabel(action) }}</button>
-                        }
-                        @if (ann.status !== 'archived') {
-                          <button type="button" class="danger-button" (click)="confirmDelete(ann)" [id]="'delete-announcement-' + ann.id">Archive</button>
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- ─── Pagination ────────────────────────────────────────────────── -->
-        @if (total() > pageSize) {
-          <div class="table-footer">
-            <span>Showing {{ announcements().length }} of {{ total() }} announcements</span>
-            <div style="display:flex;gap:8px">
-              <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
-              <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+        <!-- ─── Filters ───────────────────────────────────────────────────────── -->
+        <div class="data-card">
+          <div class="card-toolbar">
+            <div style="display:flex;gap:12px;align-items:center;flex:1;flex-wrap:wrap">
+              <label class="search-field">
+                <input
+                  type="search"
+                  placeholder="Search announcements by title or slug…"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="onSearch()"
+                  id="announcements-search"
+                />
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="statusFilter" (ngModelChange)="loadAnnouncements()" id="announcements-status-filter">
+                  <option value="">All Statuses</option>
+                  <option value="draft">Draft</option>
+                  <option value="review">In Review</option>
+                  <option value="published">Published</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="typeFilter" (ngModelChange)="loadAnnouncements()" id="announcements-type-filter">
+                  <option value="">All Types</option>
+                  @for (t of announcementTypes(); track t.id) {
+                    <option [value]="t.id">{{ t.name }}</option>
+                  }
+                </select>
+              </label>
+              <label class="select-field">
+                <select [(ngModel)]="priorityFilter" (ngModelChange)="loadAnnouncements()" id="announcements-priority-filter">
+                  <option value="">All Priorities</option>
+                  @for (p of priorities; track p) {
+                    <option [value]="p">{{ p | titlecase }}</option>
+                  }
+                </select>
+              </label>
             </div>
           </div>
-        }
-      </div>
+
+          <!-- ─── Table ─────────────────────────────────────────────────────── -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Announcement</th>
+                  <th>Type</th>
+                  <th>Priority</th>
+                  <th>Validity Range</th>
+                  <th>Status</th>
+                  <th>Updated</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (loading()) {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Loading announcements…</td>
+                  </tr>
+                } @else if (announcements().length === 0) {
+                  <tr>
+                    <td colspan="7" class="empty-cell">
+                      No announcements found.
+                      <button type="button" class="ghost-button" style="margin-left:10px" (click)="openCreateModal()">Create one now</button>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (ann of announcements(); track ann.id) {
+                    <tr>
+                      <td>
+                        <div class="page-cell">
+                          <strong>{{ ann.title }}</strong>
+                          <span class="muted font-mono" style="font-size:0.76rem">{{ ann.slug }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="pill pill-draft">{{ ann.announcement_type_name }}</span>
+                      </td>
+                      <td>
+                        <span [class]="priorityClass(ann.priority)">{{ ann.priority | uppercase }}</span>
+                      </td>
+                      <td>
+                        <div style="font-size:0.84rem">
+                          <div>From: {{ ann.valid_from | date:'dd MMM yyyy, HH:mm' }}</div>
+                          <div class="muted">
+                            @if (ann.valid_until) {
+                              Until: {{ ann.valid_until | date:'dd MMM yyyy, HH:mm' }}
+                            } @else {
+                              Until: Permanent
+                            }
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="pill" [ngClass]="statusClass(ann.status)">{{ ann.status }}</span>
+                      </td>
+                      <td>
+                        <span class="muted">{{ ann.updated_at | date:'dd MMM yyyy' }}</span>
+                      </td>
+                      <td class="right">
+                        <div class="row-actions">
+                          <button type="button" class="ghost-button" (click)="openEditModal(ann)" [id]="'edit-announcement-' + ann.id">Edit</button>
+                          @for (action of availableActions(ann.status); track action) {
+                            <button
+                              type="button"
+                              [class]="workflowClass(action)"
+                              (click)="openStatusModal(ann, action)"
+                              [id]="'action-' + action + '-' + ann.id"
+                            >{{ workflowLabel(action) }}</button>
+                          }
+                          @if (ann.status !== 'archived') {
+                            <button type="button" class="danger-button" (click)="confirmDelete(ann)" [id]="'delete-announcement-' + ann.id">Archive</button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ─── Pagination ────────────────────────────────────────────────── -->
+          @if (total() > pageSize) {
+            <div class="table-footer">
+              <span>Showing {{ announcements().length }} of {{ total() }} announcements</span>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="ghost-button" [disabled]="currentOffset() === 0" (click)="prevPage()">← Prev</button>
+                <button type="button" class="ghost-button" [disabled]="currentOffset() + pageSize >= total()" (click)="nextPage()">Next →</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -442,6 +446,14 @@ export class AdminAnnouncements implements OnInit {
   private readonly announcementsService = inject(AnnouncementsService);
   private readonly orgService = inject(OrganizationService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+
+  readonly isEditor = computed(() => {
+    const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
+    return !roles.includes('SUPER_ADMIN') && !roles.includes('UNIVERSITY_ADMIN');
+  });
 
   // ─── State ────────────────────────────────────────────────────────────────
   announcements    = signal<Announcement[]>([]);
@@ -508,6 +520,17 @@ export class AdminAnnouncements implements OnInit {
     this.loadAnnouncements();
     this.loadMetadata();
     this.loadMetrics();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['create']) {
+        this.openCreateModal();
+      } else if (params['edit']) {
+        this.announcementsService.getAnnouncement(params['edit']).subscribe({
+          next: (ann) => this.openEditModal(ann),
+          error: (err) => this.toast.error('Error', 'Failed to load announcement for editing')
+        });
+      }
+    });
   }
 
   loadAnnouncements() {
@@ -603,7 +626,12 @@ export class AdminAnnouncements implements OnInit {
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { this.showFormModal.set(false); }
+  closeFormModal() { 
+    this.showFormModal.set(false); 
+    if (this.isEditor()) {
+      this.router.navigate(['/admin/content']);
+    }
+  }
 
   onTitleChange(title: string) {
     if (!this.isEditMode()) {

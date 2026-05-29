@@ -59,6 +59,35 @@ import { AuthService } from '../../services/auth.service';
                 type="button"
                 class="google-button secondary-btn"
                 [disabled]="isLoading()"
+                (click)="signInWithDev('university_admin@mes.ac.in')"
+              >
+                @if (isLoading()) {
+                  <div class="spinner"></div>
+                  <span>Signing in…</span>
+                } @else {
+                  <span>Sign in as University Admin</span>
+                }
+              </button>
+
+              <button
+                type="button"
+                class="google-button secondary-btn"
+                [disabled]="isLoading()"
+                (click)="signInWithDev('school_admin@mes.ac.in')"
+              >
+                @if (isLoading()) {
+                  <div class="spinner"></div>
+                  <span>Signing in…</span>
+                } @else {
+                  <span>Sign in as School Admin</span>
+                }
+              </button>
+
+
+              <button
+                type="button"
+                class="google-button secondary-btn"
+                [disabled]="isLoading()"
                 (click)="signInWithDev('editor@mes.ac.in')"
               >
                 @if (isLoading()) {
@@ -68,6 +97,7 @@ import { AuthService } from '../../services/auth.service';
                   <span>Sign in as Editor</span>
                 }
               </button>
+
             </div>
 
             <div class="domain-notice">
@@ -286,8 +316,8 @@ import { AuthService } from '../../services/auth.service';
     .button-group {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      width: 100%;
+      gap: 10px;
+      margin-top: 24px;
     }
 
     .google-button {
@@ -296,15 +326,16 @@ import { AuthService } from '../../services/auth.service';
       justify-content: center;
       gap: 12px;
       width: 100%;
-      padding: 14px 20px;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      background: #fff;
-      color: #1f2937;
-      font-size: 0.95rem;
+      height: 44px;
+      background: #0f172a;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
       position: relative;
       overflow: hidden;
     }
@@ -342,8 +373,9 @@ import { AuthService } from '../../services/auth.service';
 
     .secondary-btn {
       background: #f8fafc;
-      border-color: #cbd5e1;
+      border: 1px solid #cbd5e1;
       color: #475569;
+      box-shadow: none;
     }
     
     .secondary-btn:hover:not(:disabled) {

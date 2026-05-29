@@ -45,7 +45,7 @@ import { AuthService } from '../../services/auth.service';
                 type="button"
                 class="google-button"
                 [disabled]="isLoading()"
-                (click)="signInWithDev('yash@mes.ac.in')"
+                (click)="signInWithDev('super_admin@mes.ac.in')"
               >
                 @if (isLoading()) {
                   <div class="spinner"></div>

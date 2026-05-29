@@ -13,6 +13,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx --test test/**/*.test.ts",
     "seed:super-admin": "tsx scripts/seed-super-admin.ts",
+    "seed:all-roles": "tsx scripts/seed-all-roles.ts",
+    "seed:editor": "tsx scripts/seed-editor.ts",
+    "seed:all": "npm run seed:super-admin && npm run seed:all-roles && npm run seed:editor",
     "db:migrate": "knex migrate:latest --knexfile knexfile.cjs --env local",
     "db:rollback": "knex migrate:rollback --knexfile knexfile.cjs --env local",
     "db:status": "knex migrate:status --knexfile knexfile.cjs --env local"

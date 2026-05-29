@@ -14,10 +14,11 @@ const db = createDatabaseConnection({
 });
 
 const rolesToSeed = [
+  { email: 'super_admin@mes.ac.in', name: 'Super Admin User', role: 'SUPER_ADMIN' },
   { email: 'university_admin@mes.ac.in', name: 'University Admin User', role: 'UNIVERSITY_ADMIN' },
   { email: 'school_admin@mes.ac.in', name: 'School Admin User', role: 'SCHOOL_ADMIN' },
   { email: 'reviewer@mes.ac.in', name: 'Reviewer User', role: 'REVIEWER' },
-  { email: 'content_creator@mes.ac.in', name: 'Content Creator User', role: 'CONTENT_CREATOR' }
+  { email: 'content_creator@mes.ac.in', name: 'Content Creator User', role: 'CONTENT_CREATOR' },
 ];
 
 async function seed() {

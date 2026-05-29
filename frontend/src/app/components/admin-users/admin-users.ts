@@ -20,20 +20,6 @@ import { User, UserDetails, UserService } from '../../services/user.service';
         <button type="button" class="primary-button" (click)="openCreateModal()">Create User</button>
       </header>
 
-      <div class="metric-grid">
-        <article class="metric-card">
-          <span>Total Users</span>
-          <strong>{{ totalUsers() }}</strong>
-        </article>
-        <article class="metric-card">
-          <span>Active Accounts</span>
-          <strong>{{ activeCount() }}</strong>
-        </article>
-        <article class="metric-card">
-          <span>Roles Available</span>
-          <strong>{{ availableRoles().length }}</strong>
-        </article>
-      </div>
 
       <section class="data-card">
         <div class="card-toolbar">

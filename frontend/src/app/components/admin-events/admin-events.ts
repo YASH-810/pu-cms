@@ -40,7 +40,6 @@ const TIMEZONES = ['Asia/Kolkata', 'UTC', 'Europe/London', 'America/New_York', '
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      @if (!isEditor()) {
         <!-- ─── Page Header ──────────────────────────────────────────────────── -->
         <header class="page-header">
           <div>
@@ -206,7 +205,6 @@ const TIMEZONES = ['Asia/Kolkata', 'UTC', 'Europe/London', 'America/New_York', '
             </div>
           }
         </div>
-      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -625,7 +623,8 @@ export class AdminEvents implements OnInit {
 
   closeFormModal() { 
     this.showFormModal.set(false); 
-    if (this.isEditor()) {
+    const params = this.route.snapshot.queryParams;
+    if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
     }
   }

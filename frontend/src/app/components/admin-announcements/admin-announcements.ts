@@ -36,7 +36,6 @@ const PRIORITIES = ['low', 'medium', 'high', 'critical'];
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      @if (!isEditor()) {
         <!-- ─── Page Header ──────────────────────────────────────────────────── -->
         <header class="page-header">
           <div>
@@ -204,7 +203,6 @@ const PRIORITIES = ['low', 'medium', 'high', 'critical'];
             </div>
           }
         </div>
-      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -641,7 +639,8 @@ export class AdminAnnouncements implements OnInit {
 
   closeFormModal() { 
     this.showFormModal.set(false); 
-    if (this.isEditor()) {
+    const params = this.route.snapshot.queryParams;
+    if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
     }
   }

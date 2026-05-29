@@ -26,16 +26,6 @@ import { ToastService } from '../../services/toast.service';
         </div>
       </header>
 
-      <div class="metric-grid">
-        <div class="metric-card">
-          <span>Unread Notifications</span>
-          <strong [class.unread-highlight]="unreadCount() > 0">{{ unreadCount() }}</strong>
-        </div>
-        <div class="metric-card">
-          <span>Total Received</span>
-          <strong>{{ total() }}</strong>
-        </div>
-      </div>
 
       <div class="data-card">
         <div class="card-toolbar" style="display:flex;gap:12px">

@@ -142,8 +142,9 @@ export class AdminUnifiedContent implements OnInit {
   viewMode = signal<'all' | 'review' | 'published' | 'archived'>('all');
 
   readonly pageTitle = computed(() => {
+    const isSuperAdmin = this.auth.context()?.globalRoles?.some(r => r.name === 'SUPER_ADMIN' || r.name === 'UNIVERSITY_ADMIN');
     switch (this.viewMode()) {
-      case 'review': return 'Review Queue';
+      case 'review': return isSuperAdmin ? 'Approvals' : 'Review Queue';
       case 'published': return 'Published Content';
       case 'archived': return 'Archived Content';
       default: return 'All Content';

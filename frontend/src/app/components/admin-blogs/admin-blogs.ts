@@ -37,7 +37,6 @@ function availableActions(status: string): WorkflowAction[] {
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      @if (!isEditor()) {
         <!-- ─── Page Header ──────────────────────────────────────────────────── -->
         <header class="page-header">
           <div>
@@ -188,7 +187,6 @@ function availableActions(status: string): WorkflowAction[] {
             </div>
           }
         </div>
-      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -547,7 +545,8 @@ export class AdminBlogs implements OnInit {
 
   closeFormModal() { 
     this.showFormModal.set(false); 
-    if (this.isEditor()) {
+    const params = this.route.snapshot.queryParams;
+    if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
     }
   }

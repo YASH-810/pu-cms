@@ -49,7 +49,6 @@ export class ReplaceUnderscoresPipe implements PipeTransform {
   imports: [CommonModule, FormsModule, ReplaceUnderscoresPipe],
   template: `
     <section class="page">
-      @if (!isEditor()) {
         <!-- ─── Page Header ──────────────────────────────────────────────────── -->
         <header class="page-header">
           <div>
@@ -221,7 +220,6 @@ export class ReplaceUnderscoresPipe implements PipeTransform {
             </div>
           }
         </div>
-      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -608,7 +606,8 @@ export class AdminStories implements OnInit {
 
   closeFormModal() { 
     this.showFormModal.set(false); 
-    if (this.isEditor()) {
+    const params = this.route.snapshot.queryParams;
+    if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
     }
   }

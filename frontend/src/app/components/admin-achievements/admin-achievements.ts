@@ -37,7 +37,6 @@ const TYPES = ['academic', 'research', 'sports', 'cultural', 'community', 'other
   imports: [CommonModule, FormsModule],
   template: `
     <section class="page">
-      @if (!isEditor()) {
         <!-- ─── Page Header ──────────────────────────────────────────────────── -->
         <header class="page-header">
           <div>
@@ -209,7 +208,6 @@ const TYPES = ['academic', 'research', 'sports', 'cultural', 'community', 'other
             </div>
           }
         </div>
-      }
     </section>
 
     <!-- ═══ Create / Edit Modal ═══════════════════════════════════════════════ -->
@@ -577,7 +575,8 @@ export class AdminAchievements implements OnInit {
 
   closeFormModal() { 
     this.showFormModal.set(false); 
-    if (this.isEditor()) {
+    const params = this.route.snapshot.queryParams;
+    if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
     }
   }

@@ -25,10 +25,28 @@ import { NotificationsService } from '../../services/notifications.service';
           </div>
 
           <nav class="nav-list" aria-label="Admin navigation">
-            @for (item of filteredNavItems(); track item.path) {
-              <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
-                <span>{{ item.label }}</span>
-              </a>
+            @for (item of filteredNavItems(); track item.label) {
+              @if (item.children) {
+                <div class="nav-group">
+                  <button type="button" class="nav-link dropdown-toggle" (click)="toggleDropdown(item.label)" [class.active]="isGroupActive(item)">
+                    <span>{{ item.label }}</span>
+                    <span class="caret" [class.open]="openDropdowns[item.label]">▼</span>
+                  </button>
+                  @if (openDropdowns[item.label]) {
+                    <div class="nav-children">
+                      @for (child of item.children; track child.path) {
+                        <a [routerLink]="child.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link child-link">
+                          <span>{{ child.label }}</span>
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+                  <span>{{ item.label }}</span>
+                </a>
+              }
             }
           </nav>
         </div>
@@ -183,7 +201,6 @@ import { NotificationsService } from '../../services/notifications.service';
       gap: 6px;
     }
 
-    /* FIX: Changed navigation link text colors and hover states for light mode */
     .nav-link {
       display: flex;
       align-items: center;
@@ -195,12 +212,46 @@ import { NotificationsService } from '../../services/notifications.service';
       font-size: 0.92rem;
       font-weight: 600;
       transition: background 0.16s ease, color 0.16s ease;
+      text-decoration: none;
     }
 
     .nav-link:hover,
     .nav-link.active {
       background: var(--primary-red-light);
       color: var(--primary-red);
+    }
+
+    .dropdown-toggle {
+      justify-content: space-between;
+      width: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .caret {
+      font-size: 0.6rem;
+      transition: transform 0.2s ease;
+    }
+
+    .caret.open {
+      transform: rotate(180deg);
+    }
+
+    .nav-children {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+      margin-left: 18px;
+      padding-left: 12px;
+      border-left: 1px solid #e2e8f0;
+    }
+
+    .child-link {
+      height: 38px;
+      font-size: 0.86rem;
     }
 
     .nav-icon {
@@ -434,34 +485,51 @@ export class AdminLayout {
   readonly currentUrl = signal(this.router.url);
   loginEmail = 'admin@pu.edu';
   readonly unreadNotifications = signal(0);
+  
+  openDropdowns: Record<string, boolean> = { 'Content Pages': true };
+
+  toggleDropdown(label: string) {
+    this.openDropdowns[label] = !this.openDropdowns[label];
+  }
+
+  isGroupActive(item: any): boolean {
+    return item.children.some((child: any) => this.currentUrl().startsWith(child.path));
+  }
 
   readonly filteredNavItems = computed(() => {
     const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
     const isSuperAdmin = roles.includes('SUPER_ADMIN') || roles.includes('UNIVERSITY_ADMIN');
     
-    let items = [
-      { path: '/admin/dashboard', label: 'Dashboard', icon: 'DB' }
+    let items: any[] = [
+      { path: '/admin/dashboard', label: 'Dashboard' },
+      { path: '/admin/content', label: 'Content' },
+      { 
+        label: 'Content Pages', 
+        children: [
+          { path: '/admin/blogs', label: 'Blogs & News' },
+          { path: '/admin/events', label: 'Events' },
+          { path: '/admin/announcements', label: 'Announcements' },
+          { path: '/admin/achievements', label: 'Achievements' },
+          { path: '/admin/stories', label: 'Stories' },
+          { path: '/admin/clubs', label: 'Clubs & Societies' }
+        ]
+      },
+      { path: '/admin/review-queue', label: isSuperAdmin ? 'Approvals' : 'Review Queue' }
     ];
+
+    if (!isSuperAdmin) {
+      items.push(
+        { path: '/admin/published', label: 'Published' },
+        { path: '/admin/archived', label: 'Archived' }
+      );
+    }
 
     if (isSuperAdmin) {
       items.push(
-        { path: '/admin/blogs', label: 'Blogs & News', icon: 'BL' },
-        { path: '/admin/events', label: 'Events', icon: 'EV' },
-        { path: '/admin/announcements', label: 'Announcements', icon: 'AN' },
-        { path: '/admin/achievements', label: 'Achievements', icon: 'AC' },
-        { path: '/admin/stories', label: 'Stories', icon: 'ST' },
-        { path: '/admin/clubs', label: 'Clubs & Societies', icon: 'CL' },
-        { path: '/admin/users', label: 'Users', icon: 'US' },
-        { path: '/admin/organizations', label: 'Organizations', icon: 'OR' },
-        { path: '/admin/taxonomies', label: 'Taxonomy', icon: 'TX' },
-        { path: '/admin/notifications', label: 'Notifications', icon: 'NT' }
-      );
-    } else {
-      items.push(
-        { path: '/admin/content', label: 'Content', icon: 'CO' },
-        { path: '/admin/review-queue', label: 'Review Queue', icon: 'RQ' },
-        { path: '/admin/published', label: 'Published', icon: 'PB' },
-        { path: '/admin/archived', label: 'Archived', icon: 'AR' }
+        { path: '/admin/users', label: 'Users' },
+        { path: '/admin/organizations', label: 'Organizations' },
+        { path: '/admin/taxonomies', label: 'Taxonomy' },
+        { path: '/admin/notifications', label: 'Notifications' }
       );
     }
     

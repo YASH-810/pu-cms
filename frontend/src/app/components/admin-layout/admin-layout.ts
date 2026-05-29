@@ -27,7 +27,6 @@ import { NotificationsService } from '../../services/notifications.service';
           <nav class="nav-list" aria-label="Admin navigation">
             @for (item of filteredNavItems(); track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
-                <span class="nav-icon">{{ item.icon }}</span>
                 <span>{{ item.label }}</span>
               </a>
             }
@@ -41,7 +40,13 @@ import { NotificationsService } from '../../services/notifications.service';
                 <strong>{{ context.user.fullName }}</strong>
                 <span class="user-email">{{ context.user.email }}</span>
               </div>
-              <button type="button" class="logout-btn" (click)="logout()" aria-label="Sign out">
+              <a routerLink="/admin/notifications" class="notification-bell" [attr.aria-label]="unreadNotifications() + ' unread notifications'" title="Notifications">
+                <span class="bell-icon">🔔</span>
+                @if (unreadNotifications() > 0) {
+                  <span class="badge">{{ unreadNotifications() }}</span>
+                }
+              </a>
+              <button type="button" class="logout-btn" (click)="logout()" aria-label="Sign out" title="Sign out">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                 </svg>
@@ -58,27 +63,7 @@ import { NotificationsService } from '../../services/notifications.service';
       </aside>
 
       <section class="workspace">
-        <header class="topbar">
-          <div class="topbar-left">
-            <div class="breadcrumb">
-              <span>Admin</span>
-              <strong>{{ currentSection() }}</strong>
-            </div>
-          </div>
 
-          <div class="topbar-right">
-            @if (auth.context(); as context) {
-              <a routerLink="/admin/notifications" class="notification-bell" [attr.aria-label]="unreadNotifications() + ' unread notifications'">
-                <span class="bell-icon">🔔</span>
-                @if (unreadNotifications() > 0) {
-                  <span class="badge">{{ unreadNotifications() }}</span>
-                }
-              </a>
-            } @else {
-              <span class="muted">Sign in to manage content governance</span>
-            }
-          </div>
-        </header>
 
         <main class="content-area">
           <router-outlet></router-outlet>
@@ -287,20 +272,6 @@ import { NotificationsService } from '../../services/notifications.service';
       overflow: hidden;
     }
 
-    .topbar {
-      height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      padding: 0 30px;
-      background: rgba(255, 255, 255, 0.9);
-      border-bottom: 1px solid #e2e8f0;
-      backdrop-filter: blur(14px);
-    }
-
-    .topbar-left,
-    .topbar-right,
     .profile-chip,
     .profile-card {
       display: flex;
@@ -308,23 +279,11 @@ import { NotificationsService } from '../../services/notifications.service';
       gap: 12px;
     }
 
-
-    .breadcrumb {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .breadcrumb span,
     .profile-chip span,
     .profile-card span,
     .muted {
       color: #64748b;
       font-size: 0.8rem;
-    }
-
-    .breadcrumb strong {
-      font-size: 1rem;
     }
 
     .profile-chip {
@@ -366,6 +325,9 @@ import { NotificationsService } from '../../services/notifications.service';
       border-radius: 0;
       padding: 0;
       color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .secondary-button,
@@ -419,10 +381,6 @@ import { NotificationsService } from '../../services/notifications.service';
     }
 
     @media (max-width: 900px) {
-      .topbar {
-        padding: 0 16px;
-      }
-
       .profile-chip div:last-child {
         display: none;
       }
@@ -430,23 +388,23 @@ import { NotificationsService } from '../../services/notifications.service';
 
     .notification-bell {
       position: relative;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      background: #fff;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
       transition: all 0.16s ease;
-      color: #334155;
+      color: #64748b;
+      text-decoration: none;
+      flex-shrink: 0;
     }
     .notification-bell:hover {
-      background: var(--primary-red-light);
-      color: var(--primary-red);
-      border-color: var(--primary-red);
+      background: #f1f5f9;
+      color: #0f172a;
     }
     .notification-bell .badge {
       position: absolute;

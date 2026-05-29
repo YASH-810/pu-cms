@@ -85,7 +85,14 @@ interface UnifiedContent {
                     <td><span class="pill" [ngClass]="statusClass(item.status)">{{ item.status }}</span></td>
                     <td><span class="muted">{{ item.updated_at | date:'dd MMM yyyy' }}</span></td>
                     <td class="right">
-                      <a class="ghost-button" [routerLink]="'/admin/' + (item.type_slug === 'blog' ? 'blogs' : item.type_slug + 's')" [queryParams]="{edit: item.id}">Edit</a>
+                      <div class="dropdown">
+                        <button type="button" class="ghost-button" (click)="toggleRowDropdown(item.id)">...</button>
+                        @if (activeRowDropdown() === item.id) {
+                          <div class="dropdown-menu">
+                            <a [routerLink]="'/admin/' + (item.type_slug === 'blog' ? 'blogs' : item.type_slug + 's')" [queryParams]="{edit: item.id}">Edit Content</a>
+                          </div>
+                        }
+                      </div>
                     </td>
                   </tr>
                 }
@@ -107,33 +114,6 @@ interface UnifiedContent {
     </section>
   `,
   styles: [`
-    .dropdown-menu {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      margin-top: 8px;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      min-width: 180px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      padding: 4px;
-    }
-    .dropdown-menu a {
-      padding: 8px 12px;
-      text-decoration: none;
-      color: #334155;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    .dropdown-menu a:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
     .page-cell {
       display: flex;
       flex-direction: column;
@@ -153,6 +133,7 @@ export class AdminUnifiedContent implements OnInit {
   total = signal(0);
   loading = signal(false);
   dropdownOpen = signal(false);
+  activeRowDropdown = signal<string | null>(null);
 
   searchTerm = '';
   currentOffset = signal(0);
@@ -190,6 +171,14 @@ export class AdminUnifiedContent implements OnInit {
 
   toggleDropdown() {
     this.dropdownOpen.update(v => !v);
+  }
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
   }
 
   loadData() {

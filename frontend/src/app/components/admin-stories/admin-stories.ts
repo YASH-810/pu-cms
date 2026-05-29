@@ -184,18 +184,22 @@ export class ReplaceUnderscoresPipe implements PipeTransform {
                         }
                       </td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openEditModal(st)" [id]="'edit-story-' + st.id">Edit</button>
-                          @for (action of availableActions(st.status); track action) {
-                            <button
-                              type="button"
-                              [class]="workflowClass(action)"
-                              (click)="openStatusModal(st, action)"
-                              [id]="'action-' + action + '-' + st.id"
-                            >{{ workflowLabel(action) }}</button>
-                          }
-                          @if (st.status !== 'archived') {
-                            <button type="button" class="danger-button" (click)="confirmDelete(st)" [id]="'delete-story-' + st.id">Archive</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown(st.id)">...</button>
+                          @if (activeRowDropdown() === st.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openEditModal(st); toggleRowDropdown(st.id)" [id]="'edit-story-' + st.id">Edit</button>
+                              @for (action of availableActions(st.status); track action) {
+                                <button
+                                  type="button"
+                                  (click)="openStatusModal(st, action); toggleRowDropdown(st.id)"
+                                  [id]="'action-' + action + '-' + st.id"
+                                >{{ workflowLabel(action) }}</button>
+                              }
+                              @if (st.status !== 'archived') {
+                                <button type="button" style="color:var(--color-danger)" (click)="confirmDelete(st); toggleRowDropdown(st.id)" [id]="'delete-story-' + st.id">Archive</button>
+                              }
+                            </div>
                           }
                         </div>
                       </td>
@@ -490,6 +494,15 @@ export class AdminStories implements OnInit {
   pendingAction   = signal<WorkflowAction>('submit');
   pendingStatus   = signal('');
   statusRemarks   = '';
+  activeRowDropdown = signal<string | null>(null);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   readonly statusModalTitle = computed(() => {
     const a = this.pendingAction();

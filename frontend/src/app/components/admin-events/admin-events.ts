@@ -169,18 +169,22 @@ const TIMEZONES = ['Asia/Kolkata', 'UTC', 'Europe/London', 'America/New_York', '
                         <span class="muted">{{ event.updated_at | date:'dd MMM yyyy' }}</span>
                       </td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openEditModal(event)" [id]="'edit-event-' + event.id">Edit</button>
-                          @for (action of availableActions(event.status); track action) {
-                            <button
-                              type="button"
-                              [class]="workflowClass(action)"
-                              (click)="openStatusModal(event, action)"
-                              [id]="'action-' + action + '-' + event.id"
-                            >{{ workflowLabel(action) }}</button>
-                          }
-                          @if (event.status !== 'archived') {
-                            <button type="button" class="danger-button" (click)="confirmDelete(event)" [id]="'delete-event-' + event.id">Archive</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown(event.id)">...</button>
+                          @if (activeRowDropdown() === event.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openEditModal(event); toggleRowDropdown(event.id)" [id]="'edit-event-' + event.id">Edit</button>
+                              @for (action of availableActions(event.status); track action) {
+                                <button
+                                  type="button"
+                                  (click)="openStatusModal(event, action); toggleRowDropdown(event.id)"
+                                  [id]="'action-' + action + '-' + event.id"
+                                >{{ workflowLabel(action) }}</button>
+                              }
+                              @if (event.status !== 'archived') {
+                                <button type="button" style="color:var(--color-danger)" (click)="confirmDelete(event); toggleRowDropdown(event.id)" [id]="'delete-event-' + event.id">Archive</button>
+                              }
+                            </div>
                           }
                         </div>
                       </td>
@@ -493,6 +497,15 @@ export class AdminEvents implements OnInit {
   pendingAction    = signal<WorkflowAction>('submit');
   pendingStatus    = signal('');
   statusRemarks    = '';
+  activeRowDropdown = signal<string | null>(null);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   readonly statusModalTitle = computed(() => {
     const a = this.pendingAction();

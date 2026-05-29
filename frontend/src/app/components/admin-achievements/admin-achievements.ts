@@ -172,18 +172,22 @@ const TYPES = ['academic', 'research', 'sports', 'cultural', 'community', 'other
                         }
                       </td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openEditModal(ac)" [id]="'edit-achievement-' + ac.id">Edit</button>
-                          @for (action of availableActions(ac.status); track action) {
-                            <button
-                              type="button"
-                              [class]="workflowClass(action)"
-                              (click)="openStatusModal(ac, action)"
-                              [id]="'action-' + action + '-' + ac.id"
-                            >{{ workflowLabel(action) }}</button>
-                          }
-                          @if (ac.status !== 'archived') {
-                            <button type="button" class="danger-button" (click)="confirmDelete(ac)" [id]="'delete-achievement-' + ac.id">Archive</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown(ac.id)">...</button>
+                          @if (activeRowDropdown() === ac.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openEditModal(ac); toggleRowDropdown(ac.id)" [id]="'edit-achievement-' + ac.id">Edit</button>
+                              @for (action of availableActions(ac.status); track action) {
+                                <button
+                                  type="button"
+                                  (click)="openStatusModal(ac, action); toggleRowDropdown(ac.id)"
+                                  [id]="'action-' + action + '-' + ac.id"
+                                >{{ workflowLabel(action) }}</button>
+                              }
+                              @if (ac.status !== 'archived') {
+                                <button type="button" style="color:var(--color-danger)" (click)="confirmDelete(ac); toggleRowDropdown(ac.id)" [id]="'delete-achievement-' + ac.id">Archive</button>
+                              }
+                            </div>
                           }
                         </div>
                       </td>
@@ -458,6 +462,15 @@ export class AdminAchievements implements OnInit {
   pendingAction   = signal<WorkflowAction>('submit');
   pendingStatus   = signal('');
   statusRemarks   = '';
+  activeRowDropdown = signal<string | null>(null);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   readonly statusModalTitle = computed(() => {
     const a = this.pendingAction();

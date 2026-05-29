@@ -48,9 +48,14 @@ type TaxonomyTab = 'categories' | 'tags' | 'contentTypes';
                       <td>{{ cat.slug }}</td>
                       <td><span class="pill pill-active">{{ getContentTypeName(cat.content_type_id) }}</span></td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openCategoryModal(cat)">Edit</button>
-                          <button type="button" class="danger-button" (click)="deleteCategory(cat.id)">Delete</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown('cat_'+cat.id)">...</button>
+                          @if (activeRowDropdown() === 'cat_'+cat.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openCategoryModal(cat); toggleRowDropdown('cat_'+cat.id)">Edit</button>
+                              <button type="button" style="color:var(--color-danger)" (click)="deleteCategory(cat.id); toggleRowDropdown('cat_'+cat.id)">Delete</button>
+                            </div>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -84,9 +89,14 @@ type TaxonomyTab = 'categories' | 'tags' | 'contentTypes';
                       <td>{{ tag.slug }}</td>
                       <td>{{ tag.created_at | date:'mediumDate' }}</td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openTagModal(tag)">Edit</button>
-                          <button type="button" class="danger-button" (click)="deleteTag(tag.id)">Delete</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown('tag_'+tag.id)">...</button>
+                          @if (activeRowDropdown() === 'tag_'+tag.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openTagModal(tag); toggleRowDropdown('tag_'+tag.id)">Edit</button>
+                              <button type="button" style="color:var(--color-danger)" (click)="deleteTag(tag.id); toggleRowDropdown('tag_'+tag.id)">Delete</button>
+                            </div>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -116,7 +126,16 @@ type TaxonomyTab = 'categories' | 'tags' | 'contentTypes';
                     <td>{{ ct.table_name }}</td>
                     <td>{{ ct.slug }}</td>
                     <td><span class="pill" [class.pill-active]="ct.is_active">{{ ct.is_active ? 'Active' : 'Inactive' }}</span></td>
-                    <td class="right"><button type="button" class="ghost-button" (click)="openContentTypeModal(ct)">Configure</button></td>
+                    <td class="right">
+                      <div class="dropdown">
+                        <button type="button" class="ghost-button" (click)="toggleRowDropdown('ct_'+ct.id)">...</button>
+                        @if (activeRowDropdown() === 'ct_'+ct.id) {
+                          <div class="dropdown-menu">
+                            <button type="button" (click)="openContentTypeModal(ct); toggleRowDropdown('ct_'+ct.id)">Configure</button>
+                          </div>
+                        }
+                      </div>
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -201,6 +220,15 @@ export class AdminTaxonomies implements OnInit {
   categoryForm: Partial<Category> = {};
   tagForm: Partial<Tag> = {};
   contentTypeForm: Partial<ContentType> = {};
+  activeRowDropdown = signal<string | null>(null);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   ngOnInit() {
     this.loadCategories();

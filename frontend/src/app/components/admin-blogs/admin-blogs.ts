@@ -151,18 +151,22 @@ function availableActions(status: string): WorkflowAction[] {
                         <span class="muted">{{ blog.updated_at | date:'dd MMM yyyy' }}</span>
                       </td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openEditModal(blog)" [id]="'edit-blog-' + blog.id">Edit</button>
-                          @for (action of availableActions(blog.status); track action) {
-                            <button
-                              type="button"
-                              [class]="workflowClass(action)"
-                              (click)="openStatusModal(blog, action)"
-                              [id]="'action-' + action + '-' + blog.id"
-                            >{{ workflowLabel(action) }}</button>
-                          }
-                          @if (blog.status !== 'archived') {
-                            <button type="button" class="danger-button" (click)="confirmDelete(blog)" [id]="'delete-blog-' + blog.id">Archive</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown(blog.id)">...</button>
+                          @if (activeRowDropdown() === blog.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openEditModal(blog); toggleRowDropdown(blog.id)" [id]="'edit-blog-' + blog.id">Edit</button>
+                              @for (action of availableActions(blog.status); track action) {
+                                <button
+                                  type="button"
+                                  (click)="openStatusModal(blog, action); toggleRowDropdown(blog.id)"
+                                  [id]="'action-' + action + '-' + blog.id"
+                                >{{ workflowLabel(action) }}</button>
+                              }
+                              @if (blog.status !== 'archived') {
+                                <button type="button" style="color:var(--color-danger)" (click)="confirmDelete(blog); toggleRowDropdown(blog.id)" [id]="'delete-blog-' + blog.id">Archive</button>
+                              }
+                            </div>
                           }
                         </div>
                       </td>
@@ -430,6 +434,15 @@ export class AdminBlogs implements OnInit {
   pendingAction    = signal<WorkflowAction>('submit');
   pendingStatus    = signal('');
   statusRemarks    = '';
+  activeRowDropdown = signal<string | null>(null);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   readonly statusModalTitle = computed(() => {
     const a = this.pendingAction();

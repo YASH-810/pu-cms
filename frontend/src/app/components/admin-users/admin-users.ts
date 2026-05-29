@@ -83,10 +83,15 @@ import { User, UserDetails, UserService } from '../../services/user.service';
                     <td>{{ user.last_login_at ? (user.last_login_at | date:'mediumDate') : 'Never' }}</td>
                     <td>{{ user.created_at | date:'mediumDate' }}</td>
                     <td class="right">
-                      <div class="row-actions">
-                        <button type="button" class="ghost-button" (click)="viewDetails(user.id)">Roles</button>
-                        <button type="button" class="ghost-button" (click)="toggleUserStatus(user)">{{ user.is_active ? 'Deactivate' : 'Activate' }}</button>
-                        <button type="button" class="danger-button" (click)="deleteUser(user.id)">Delete</button>
+                      <div class="dropdown">
+                        <button type="button" class="ghost-button" (click)="toggleRowDropdown(user.id)">...</button>
+                        @if (activeRowDropdown() === user.id) {
+                          <div class="dropdown-menu">
+                            <button type="button" (click)="viewDetails(user.id); toggleRowDropdown(user.id)">Roles</button>
+                            <button type="button" (click)="toggleUserStatus(user); toggleRowDropdown(user.id)">{{ user.is_active ? 'Deactivate' : 'Activate' }}</button>
+                            <button type="button" style="color:var(--color-danger)" (click)="deleteUser(user.id); toggleRowDropdown(user.id)">Delete</button>
+                          </div>
+                        }
                       </div>
                     </td>
                   </tr>
@@ -230,8 +235,17 @@ export class AdminUsers implements OnInit {
   selectedUserDetails = signal<UserDetails | null>(null);
   newUser = { email: '', full_name: '', global_roles: [] as string[] };
   newScope = { organization_id: '', role_id: '' };
+  activeRowDropdown = signal<string | null>(null);
 
   activeCount = signal(0);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   ngOnInit() {
     this.loadUsers();

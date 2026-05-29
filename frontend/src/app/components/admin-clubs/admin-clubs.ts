@@ -150,18 +150,22 @@ function availableActions(status: string): WorkflowAction[] {
                         <span class="muted">{{ cl.updated_at | date:'dd MMM yyyy' }}</span>
                       </td>
                       <td class="right">
-                        <div class="row-actions">
-                          <button type="button" class="ghost-button" (click)="openEditModal(cl)" [id]="'edit-club-' + cl.id">Edit</button>
-                          @for (action of availableActions(cl.status); track action) {
-                            <button
-                              type="button"
-                              [class]="workflowClass(action)"
-                              (click)="openStatusModal(cl, action)"
-                              [id]="'action-' + action + '-' + cl.id"
-                            >{{ workflowLabel(action) }}</button>
-                          }
-                          @if (cl.status !== 'archived') {
-                            <button type="button" class="danger-button" (click)="confirmDelete(cl)" [id]="'delete-club-' + cl.id">Archive</button>
+                        <div class="dropdown">
+                          <button type="button" class="ghost-button" (click)="toggleRowDropdown(cl.id)">...</button>
+                          @if (activeRowDropdown() === cl.id) {
+                            <div class="dropdown-menu">
+                              <button type="button" (click)="openEditModal(cl); toggleRowDropdown(cl.id)" [id]="'edit-club-' + cl.id">Edit</button>
+                              @for (action of availableActions(cl.status); track action) {
+                                <button
+                                  type="button"
+                                  (click)="openStatusModal(cl, action); toggleRowDropdown(cl.id)"
+                                  [id]="'action-' + action + '-' + cl.id"
+                                >{{ workflowLabel(action) }}</button>
+                              }
+                              @if (cl.status !== 'archived') {
+                                <button type="button" style="color:var(--color-danger)" (click)="confirmDelete(cl); toggleRowDropdown(cl.id)" [id]="'delete-club-' + cl.id">Archive</button>
+                              }
+                            </div>
                           }
                         </div>
                       </td>
@@ -436,6 +440,15 @@ export class AdminClubs implements OnInit {
   pendingAction   = signal<WorkflowAction>('submit');
   pendingStatus   = signal('');
   statusRemarks   = '';
+  activeRowDropdown = signal<string | null>(null);
+
+  toggleRowDropdown(id: string) {
+    if (this.activeRowDropdown() === id) {
+      this.activeRowDropdown.set(null);
+    } else {
+      this.activeRowDropdown.set(id);
+    }
+  }
 
   readonly statusModalTitle = computed(() => {
     const a = this.pendingAction();

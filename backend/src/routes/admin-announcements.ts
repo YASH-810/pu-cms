@@ -60,12 +60,12 @@ interface ListAnnouncementsQuery {
 }
 
 export async function adminAnnouncementsRoutes(app: FastifyInstance): Promise<void> {
-  const readGuard = requirePermission('REVIEW_CONTENT');
-  const writeGuard = requirePermission('REVIEW_CONTENT');
-  const createGuard = requirePermission('REVIEW_CONTENT');
-  const deleteGuard = requirePermission('REVIEW_CONTENT');
-  const publishGuard = requirePermission('APPROVE_CONTENT');
-  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
+  const readGuard = requirePermission('UPDATE_ANNOUNCEMENT');
+  const writeGuard = requirePermission('UPDATE_ANNOUNCEMENT');
+  const createGuard = requirePermission('CREATE_ANNOUNCEMENT');
+  const deleteGuard = requirePermission('DELETE_ANNOUNCEMENT');
+  const publishGuard = requirePermission('APPROVE_ANNOUNCEMENT');
+  const statusGuard = requireStatusPermission('UPDATE_ANNOUNCEMENT', 'APPROVE_ANNOUNCEMENT');
 
   // ---------------------------------------------------------------------------
   // GET /api/v1/admin/announcements/types

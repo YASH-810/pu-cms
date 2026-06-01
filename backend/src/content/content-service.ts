@@ -185,13 +185,6 @@ export class ContentService {
         })
         .returning('*');
 
-      try {
-        const tableName = input.contentTypeSlug === 'club' ? 'club_details' : input.contentTypeSlug === 'story' ? 'stories' : input.contentTypeSlug + 's';
-        await trx(tableName).where({ entity_id: input.entityId }).update({ status: nextStatus });
-      } catch (err) {
-        // Ignore if column doesn't exist
-      }
-
       await trx('entity_approval_logs').insert({
         content_type_id: contentType.id,
         entity_id: input.entityId,
@@ -218,15 +211,13 @@ export class ContentService {
 
     if (action) {
       const notificationService = new NotificationService(this.db);
-      notificationService.triggerWorkflowNotification(
+      await notificationService.triggerWorkflowNotification(
         input.entityId,
         input.contentTypeSlug,
         action,
         input.remarks,
         context.actorId
-      ).catch(err => {
-        console.error('NOTIFICATION ERROR ON STATUS TRANSITION:', err);
-      });
+      );
     }
 
     return updated;

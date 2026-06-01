@@ -33,7 +33,7 @@ async function cleanup(): Promise<void> {
 before(async () => {
   process.env.NODE_ENV = 'test';
   process.env.LOG_LEVEL = 'silent';
-  process.env.DATABASE_URL = 'postgresql://postgres@127.0.0.1:5432/postgres';
+  process.env.DATABASE_URL = 'postgresql://postgres:1234@localhost:5432/postgres';
 
   app = await buildApp();
   await app.ready();

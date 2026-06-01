@@ -1,5 +1,5 @@
-import { createDatabaseConnection } from './src/db/connection.js';
-import { resolvePermission } from './src/auth/authorization.js';
+import { createDatabaseConnection } from '../../src/db/connection.js';
+import { resolvePermission } from '../../src/auth/authorization.js';
 
 async function check() {
   const db = createDatabaseConnection({

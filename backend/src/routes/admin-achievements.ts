@@ -59,12 +59,12 @@ interface ListAchievementsQuery {
 }
 
 export async function adminAchievementsRoutes(app: FastifyInstance): Promise<void> {
-  const readGuard = requirePermission('REVIEW_CONTENT');
-  const writeGuard = requirePermission('REVIEW_CONTENT');
-  const createGuard = requirePermission('REVIEW_CONTENT');
-  const deleteGuard = requirePermission('REVIEW_CONTENT');
-  const publishGuard = requirePermission('APPROVE_CONTENT');
-  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
+  const readGuard = requirePermission('UPDATE_ACHIEVEMENT');
+  const writeGuard = requirePermission('UPDATE_ACHIEVEMENT');
+  const createGuard = requirePermission('CREATE_ACHIEVEMENT');
+  const deleteGuard = requirePermission('DELETE_ACHIEVEMENT');
+  const publishGuard = requirePermission('APPROVE_ACHIEVEMENT');
+  const statusGuard = requireStatusPermission('UPDATE_ACHIEVEMENT', 'APPROVE_ACHIEVEMENT');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/achievements

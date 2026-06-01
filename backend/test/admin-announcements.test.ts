@@ -355,14 +355,6 @@ test('Public announcement lists and date window exclusions', async () => {
   });
   assert.equal(aStatusRes.statusCode, 200);
 
-  // DB debug log
-  const dbAnnouncement = await app.db('announcements').where({ id: activeId }).first();
-  const dbEntity = await app.db('content_entities').where({ id: dbAnnouncement.entity_id }).first();
-  const dbTypes = await app.db('content_types').select('*');
-  console.log('DB ANNOUNCEMENT:', dbAnnouncement);
-  console.log('DB ENTITY:', dbEntity);
-  console.log('DB CONTENT TYPES:', dbTypes);
-
   // Fetch public announcements listing
   const listRes = await app.inject({
     method: 'GET',
@@ -375,8 +367,6 @@ test('Public announcement lists and date window exclusions', async () => {
   // Assert only currently active is returned (future and expired are hidden)
   const items = listBody.data.announcements;
   const slugs = items.map((x: any) => x.slug);
-  console.log('ACTIVE CHECK SLUGS:', slugs);
-  console.log('FULL LIST RESPONSE DATA:', JSON.stringify(listBody.data, null, 2));
   assert.ok(slugs.includes(`${testSlugBase}-active`));
   assert.ok(!slugs.includes(`${testSlugBase}-future`));
   assert.ok(!slugs.includes(`${testSlugBase}-expired`));

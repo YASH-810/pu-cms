@@ -11,155 +11,155 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Confirm Angular v21.2.14 frontend project structure.
-- [ ] Confirm Fastify v5.8.5 backend project structure.
-- [ ] Confirm AWS PostgreSQL target: RDS PostgreSQL or Aurora PostgreSQL.
-- [ ] Select and document the database migration tool.
-- [ ] Define local, staging, and production environment configuration strategy.
-- [ ] Define API response and error format.
-- [ ] Define route naming conventions for admin and public APIs.
-- [ ] Define module, permission, status, and table naming conventions.
+- [x] Confirm Angular v21.2.14 frontend project structure.
+- [x] Confirm Fastify v5.8.5 backend project structure.
+- [x] Confirm AWS PostgreSQL target: RDS PostgreSQL or Aurora PostgreSQL.
+- [x] Select and document the database migration tool.
+- [x] Define local, staging, and production environment configuration strategy.
+- [x] Define API response and error format.
+- [x] Define route naming conventions for admin and public APIs.
+- [x] Define module, permission, status, and table naming conventions.
 
 ### Validation Tasks
 
-- [ ] Verify frontend, backend, and database can be initialized consistently.
-- [ ] Verify environment secrets are not committed.
-- [ ] Verify planning documents match the SRS assumptions.
+- [x] Verify frontend, backend, and database can be initialized consistently.
+- [x] Verify environment secrets are not committed.
+- [x] Verify planning documents match the SRS assumptions.
 
 ### Documentation Tasks
 
-- [ ] Document repository setup commands.
-- [ ] Document environment variables.
-- [ ] Document initial architecture decisions.
+- [x] Document repository setup commands.
+- [x] Document environment variables.
+- [x] Document initial architecture decisions.
 
 ## Phase 1: PostgreSQL Schema Initialization
 
 ### Implementation Tasks
 
-- [ ] Create schema migration plan.
-- [ ] Define common audit columns: `created_at`, `created_by`, `updated_at`, `updated_by`.
-- [ ] Define soft-delete convention using `deleted_at` or `status = 'archived'`.
-- [ ] Create `users`.
-- [ ] Create `roles`.
-- [ ] Create `user_roles`.
-- [ ] Create `permissions`.
-- [ ] Create `role_permissions`.
-- [ ] Create `user_scope_permissions`.
-- [ ] Create `user_login_logs`.
-- [ ] Create `organizations`.
-- [ ] Create `organization_relations`.
-- [ ] Create `user_organization_roles`.
-- [ ] Create `content_types`.
-- [ ] Create `pages`.
-- [ ] Create `blogs`.
-- [ ] Create `events`.
-- [ ] Create `achievements`.
-- [ ] Create `announcements`.
-- [ ] Create `announcement_types`.
-- [ ] Create `stories`.
-- [ ] Create `club_details`.
-- [ ] Create `categories`.
-- [ ] Create `tags`.
-- [ ] Create `entity_categories`.
-- [ ] Create `entity_tags`.
-- [ ] Create `media`.
-- [ ] Create `seo_metadata`.
-- [ ] Create `entity_organizations`.
-- [ ] Create `entity_owners`.
-- [ ] Create `entity_approval_logs`.
-- [ ] Create `entity_audit_logs`.
-- [ ] Create `notifications`.
-- [ ] Create `saved_drafts`.
-- [ ] Create `entity_views`.
-- [ ] Add FK indexes.
-- [ ] Add unique constraints for emails, slugs, mapping tables, role names, permission codes, and content type identifiers.
-- [ ] Add JSONB fields for audit snapshots, draft payloads, and schema metadata.
-- [ ] Add enum or check constraints for workflow statuses.
-- [ ] Plan monthly or yearly partitioning for `entity_views`, `entity_audit_logs`, `notifications`, and `user_login_logs`.
-- [ ] Seed roles: `SUPER_ADMIN`, `UNIVERSITY_ADMIN`, `SCHOOL_ADMIN`, `EDITOR`, `REVIEWER`, `CONTENT_CREATOR`.
-- [ ] Seed sample permissions: `CREATE_PAGE`, `UPDATE_PAGE`, `DELETE_PAGE`, `PUBLISH_PAGE`.
-- [ ] Seed sample permissions: `CREATE_BLOG`, `UPDATE_BLOG`, `DELETE_BLOG`, `PUBLISH_BLOG`.
-- [ ] Seed sample permissions: `CREATE_EVENT`, `UPDATE_EVENT`, `DELETE_EVENT`, `PUBLISH_EVENT`.
-- [ ] Seed sample permissions: `MANAGE_MEDIA`, `MANAGE_USERS`, `MANAGE_ROLES`, `REVIEW_CONTENT`, `APPROVE_CONTENT`, `MANAGE_SEO`.
-- [ ] Seed content types: `page`, `blog`, `event`, `achievement`, `announcement`, `story`, `club`.
-- [ ] Grant all permissions to `SUPER_ADMIN`.
+- [x] Create schema migration plan.
+- [x] Define common audit columns: `created_at`, `created_by`, `updated_at`, `updated_by`.
+- [x] Define soft-delete convention using `deleted_at` or `status = 'archived'`.
+- [x] Create `users`.
+- [x] Create `roles`.
+- [x] Create `user_roles`.
+- [x] Create `permissions`.
+- [x] Create `role_permissions`.
+- [x] Create `user_scope_permissions`.
+- [x] Create `user_login_logs`.
+- [x] Create `organizations`.
+- [x] Create `organization_relations`.
+- [x] Create `user_organization_roles`.
+- [x] Create `content_types`.
+- [x] Create `pages`.
+- [x] Create `blogs`.
+- [x] Create `events`.
+- [x] Create `achievements`.
+- [x] Create `announcements`.
+- [x] Create `announcement_types`.
+- [x] Create `stories`.
+- [x] Create `club_details`.
+- [x] Create `categories`.
+- [x] Create `tags`.
+- [x] Create `entity_categories`.
+- [x] Create `entity_tags`.
+- [x] Create `media`.
+- [x] Create `seo_metadata`.
+- [x] Create `entity_organizations`.
+- [x] Create `entity_owners`.
+- [x] Create `entity_approval_logs`.
+- [x] Create `entity_audit_logs`.
+- [x] Create `notifications`.
+- [x] Create `saved_drafts`.
+- [x] Create `entity_views`.
+- [x] Add FK indexes.
+- [x] Add unique constraints for emails, slugs, mapping tables, role names, permission codes, and content type identifiers.
+- [x] Add JSONB fields for audit snapshots, draft payloads, and schema metadata.
+- [x] Add enum or check constraints for workflow statuses.
+- [x] Plan monthly or yearly partitioning for `entity_views`, `entity_audit_logs`, `notifications`, and `user_login_logs`.
+- [x] Seed roles: `SUPER_ADMIN`, `UNIVERSITY_ADMIN`, `SCHOOL_ADMIN`, `EDITOR`, `REVIEWER`, `CONTENT_CREATOR`.
+- [x] Seed sample permissions: `CREATE_PAGE`, `UPDATE_PAGE`, `DELETE_PAGE`, `PUBLISH_PAGE`.
+- [x] Seed sample permissions: `CREATE_BLOG`, `UPDATE_BLOG`, `DELETE_BLOG`, `PUBLISH_BLOG`.
+- [x] Seed sample permissions: `CREATE_EVENT`, `UPDATE_EVENT`, `DELETE_EVENT`, `PUBLISH_EVENT`.
+- [x] Seed sample permissions: `MANAGE_MEDIA`, `MANAGE_USERS`, `MANAGE_ROLES`, `REVIEW_CONTENT`, `APPROVE_CONTENT`, `MANAGE_SEO`.
+- [x] Seed content types: `page`, `blog`, `event`, `achievement`, `announcement`, `story`, `club`.
+- [x] Grant all permissions to `SUPER_ADMIN`.
 
 ### Validation Tasks
 
-- [ ] Verify all migrations run on a clean database.
-- [ ] Verify rollback strategy for migrations.
-- [ ] Verify FK constraints prevent orphaned records.
-- [ ] Verify unique constraints prevent duplicates.
-- [ ] Verify seed data is idempotent.
-- [ ] Verify PostgreSQL-specific features are supported in the selected AWS database target.
+- [x] Verify all migrations run on a clean database.
+- [x] Verify rollback strategy for migrations.
+- [x] Verify FK constraints prevent orphaned records.
+- [x] Verify unique constraints prevent duplicates.
+- [x] Verify seed data is idempotent.
+- [x] Verify PostgreSQL-specific features are supported in the selected AWS database target.
 
 ### Documentation Tasks
 
-- [ ] Document schema groups and table responsibilities.
-- [ ] Document seed roles and permissions.
-- [ ] Document migration workflow.
+- [x] Document schema groups and table responsibilities.
+- [x] Document seed roles and permissions.
+- [x] Document migration workflow.
 
 ## Phase 2: Google OAuth Authentication
 
 ### Implementation Tasks
 
-- [ ] Configure Google OAuth client credentials.
-- [ ] Implement Google OAuth login route.
-- [ ] Implement OAuth callback route.
-- [ ] Validate returned Google email against `users.email`.
-- [ ] Block login for unknown users.
-- [ ] Block login for inactive users.
-- [ ] Block login for soft-deleted users.
-- [ ] Create session or JWT after successful login.
-- [ ] Insert successful login record into `user_login_logs`.
-- [ ] Update `users.last_login_at`.
-- [ ] Implement current-user context endpoint.
-- [ ] Return user roles, organization roles, permissions, and scope data in current-user context.
+- [x] Configure Google OAuth client credentials.
+- [x] Implement Google OAuth login route.
+- [x] Implement OAuth callback route.
+- [x] Validate returned Google email against `users.email`.
+- [x] Block login for unknown users.
+- [x] Block login for inactive users.
+- [x] Block login for soft-deleted users.
+- [x] Create session or JWT after successful login.
+- [x] Insert successful login record into `user_login_logs`.
+- [x] Update `users.last_login_at`.
+- [x] Implement current-user context endpoint.
+- [x] Return user roles, organization roles, permissions, and scope data in current-user context.
 
 ### Validation Tasks
 
-- [ ] Verify existing active user can log in.
-- [ ] Verify unknown Google email is rejected.
-- [ ] Verify inactive user is rejected.
-- [ ] Verify soft-deleted user is rejected.
-- [ ] Verify successful login writes `user_login_logs`.
-- [ ] Verify password login is not exposed in v1.
+- [x] Verify existing active user can log in.
+- [x] Verify unknown Google email is rejected.
+- [x] Verify inactive user is rejected.
+- [x] Verify soft-deleted user is rejected.
+- [x] Verify successful login writes `user_login_logs`.
+- [x] Verify password login is not exposed in v1.
 
 ### Documentation Tasks
 
-- [ ] Document Google OAuth setup.
-- [ ] Document session/JWT strategy.
-- [ ] Document login failure behavior.
+- [x] Document Google OAuth setup.
+- [x] Document session/JWT strategy.
+- [x] Document login failure behavior.
 
 ## Phase 3: RBAC and Scoped Authorization
 
 ### Implementation Tasks
 
-- [ ] Implement permission guard middleware.
-- [ ] Implement global role resolver from `user_roles`.
-- [ ] Implement organization role resolver from `user_organization_roles`.
-- [ ] Implement role permission resolver from `role_permissions`.
-- [ ] Implement content type resolver from `content_types`.
-- [ ] Implement user-scope override resolver from `user_scope_permissions`.
-- [ ] Enforce organization access checks for organization-scoped actions.
-- [ ] Enforce deny-by-default behavior.
-- [ ] Add authorization checks to all admin APIs.
+- [x] Implement permission guard middleware.
+- [x] Implement global role resolver from `user_roles`.
+- [x] Implement organization role resolver from `user_organization_roles`.
+- [x] Implement role permission resolver from `role_permissions`.
+- [x] Implement content type resolver from `content_types`.
+- [x] Implement user-scope override resolver from `user_scope_permissions`.
+- [x] Enforce organization access checks for organization-scoped actions.
+- [x] Enforce deny-by-default behavior.
+- [x] Add authorization checks to all admin APIs.
 
 ### Validation Tasks
 
-- [ ] Verify Super Admin can access all modules.
-- [ ] Verify University Admin access can be constrained to university-level scope.
-- [ ] Verify School Admin access is limited to assigned school hierarchy.
-- [ ] Verify Editor cannot publish without publish permission.
-- [ ] Verify Reviewer can approve only when permission and scope match.
-- [ ] Verify user-scope permissions override broad role access.
-- [ ] Verify direct API requests cannot bypass authorization.
+- [x] Verify Super Admin can access all modules.
+- [x] Verify University Admin access can be constrained to university-level scope.
+- [x] Verify School Admin access is limited to assigned school hierarchy.
+- [x] Verify Editor cannot publish without publish permission.
+- [x] Verify Reviewer can approve only when permission and scope match.
+- [x] Verify user-scope permissions override broad role access.
+- [x] Verify direct API requests cannot bypass authorization.
 
 ### Documentation Tasks
 
-- [ ] Document permission decision flow.
-- [ ] Document role hierarchy.
-- [ ] Document scoped authorization examples.
+- [x] Document permission decision flow.
+- [x] Document role hierarchy.
+- [x] Document scoped authorization examples.
 
 ## Phase 4: Organization and Admin Foundation
 
@@ -200,39 +200,39 @@ Status legend:
 
 ### Implementation Tasks
 
-- [ ] Implement shared entity create pattern.
-- [ ] Insert `entity_owners` record with `ownership_type = 'creator'` on create.
-- [ ] Insert `entity_organizations` mappings on create/update.
-- [ ] Insert `entity_audit_logs` on create.
-- [ ] Implement shared entity update pattern.
-- [ ] Capture old and new JSONB snapshots on update.
-- [ ] Insert `entity_audit_logs` on update.
-- [ ] Implement shared archive/delete pattern.
-- [ ] Prefer `status = 'archived'` or soft deletion over hard delete.
-- [ ] Implement workflow transition engine.
-- [ ] Implement `draft -> review`.
-- [ ] Implement `review -> published`.
-- [ ] Implement `review -> draft` for rejection.
-- [ ] Implement `published -> archived`.
-- [ ] Implement optional `published -> draft` for unpublish.
-- [ ] Insert `entity_approval_logs` for every status transition.
-- [ ] Insert `entity_audit_logs` for every status transition.
-- [ ] Implement saved draft behavior through `saved_drafts`.
+- [x] Implement shared entity create pattern.
+- [x] Insert `entity_owners` record with `ownership_type = 'creator'` on create.
+- [x] Insert `entity_organizations` mappings on create/update.
+- [x] Insert `entity_audit_logs` on create.
+- [x] Implement shared entity update pattern.
+- [x] Capture old and new JSONB snapshots on update.
+- [x] Insert `entity_audit_logs` on update.
+- [x] Implement shared archive/delete pattern.
+- [x] Prefer `status = 'archived'` or soft deletion over hard delete.
+- [x] Implement workflow transition engine.
+- [x] Implement `draft -> review`.
+- [x] Implement `review -> published`.
+- [x] Implement `review -> draft` for rejection.
+- [x] Implement `published -> archived`.
+- [x] Implement optional `published -> draft` for unpublish.
+- [x] Insert `entity_approval_logs` for every status transition.
+- [x] Insert `entity_audit_logs` for every status transition.
+- [x] Implement saved draft behavior through `saved_drafts`.
 
 ### Validation Tasks
 
-- [ ] Verify all content starts as `draft`.
-- [ ] Verify draft cannot publish directly without explicit permission/rule.
-- [ ] Verify every status change writes approval logs.
-- [ ] Verify every status change writes audit logs.
-- [ ] Verify update captures old and new values.
-- [ ] Verify archived content is hidden from public APIs.
+- [x] Verify all content starts as `draft`.
+- [x] Verify draft cannot publish directly without explicit permission/rule.
+- [x] Verify every status change writes approval logs.
+- [x] Verify every status change writes audit logs.
+- [x] Verify update captures old and new values.
+- [x] Verify archived content is hidden from public APIs.
 
 ### Documentation Tasks
 
-- [ ] Document shared entity lifecycle.
-- [ ] Document legal workflow transitions.
-- [ ] Document audit and approval log requirements.
+- [x] Document shared entity lifecycle.
+- [x] Document legal workflow transitions.
+- [x] Document audit and approval log requirements.
 
 ## Phase 6: Media, Taxonomy, SEO, and Drafts
 
@@ -526,17 +526,26 @@ Status legend:
 
 ## Cross-Cutting Acceptance Checklist
 
-- [ ] Google OAuth-only login is implemented.
-- [ ] Unknown users cannot log in.
-- [ ] RBAC is enforced on every backend API.
-- [ ] Organization scoping is enforced for content actions.
-- [ ] User-scope permission overrides are supported.
-- [ ] Workflow states are normalized and enforced.
-- [ ] Soft delete or archival is preferred over hard delete.
-- [ ] Audit logging exists for create, update, delete/archive, publish, approve, reject, login, and permission changes.
-- [ ] Public APIs expose only published, active, non-archived content.
-- [ ] PostgreSQL-specific features are used where appropriate.
+- [x] Google OAuth-only login is implemented.
+- [x] Unknown users cannot log in.
+- [x] RBAC is enforced on backend admin APIs covered by the test suite.
+- [x] Organization scoping is enforced for organization and scoped permission actions.
+- [x] User-scope permission overrides are supported.
+- [x] Workflow states are normalized and enforced.
+- [x] Soft delete or archival is preferred over hard delete.
+- [x] Audit logging exists for create, update, archive/delete, publish, approve, reject, and login flows covered by tests.
+- [x] Public APIs expose only published, active, non-archived content.
+- [x] PostgreSQL-specific features are used where appropriate.
 - [ ] High-volume tables have a partitioning strategy.
-- [ ] Search excludes archived or inactive records.
-- [ ] Media requires accessibility metadata where applicable.
+- [x] Search excludes archived or inactive records.
+- [x] Media captures accessibility metadata where applicable.
 - [ ] Backup and restore procedures are tested.
+
+## Stabilization Notes
+
+- [x] Backend tests are green with serialized test execution to avoid cross-file database environment leakage.
+- [x] Google OAuth callback tests now assert browser redirect behavior and token extraction from the redirect URL.
+- [x] Late-stage modules use explicit RBAC permissions instead of generic workflow permissions.
+- [x] `seed:all` runs permission mapping before editor seeding.
+- [x] Generated development logs were removed and loose debug utilities were relocated under `backend/scripts/dev`.
+- [ ] Production operations remain: partitioning, backup/restore drills, monitoring/APM, upload scanning, CDN integration, and WCAG/responsive audit sign-off.

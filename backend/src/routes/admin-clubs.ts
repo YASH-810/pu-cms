@@ -54,12 +54,12 @@ interface ListClubsQuery {
 }
 
 export async function adminClubsRoutes(app: FastifyInstance): Promise<void> {
-  const readGuard = requirePermission('REVIEW_CONTENT');
-  const writeGuard = requirePermission('REVIEW_CONTENT');
-  const createGuard = requirePermission('REVIEW_CONTENT');
-  const deleteGuard = requirePermission('REVIEW_CONTENT');
-  const publishGuard = requirePermission('APPROVE_CONTENT');
-  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
+  const readGuard = requirePermission('UPDATE_CLUB');
+  const writeGuard = requirePermission('UPDATE_CLUB');
+  const createGuard = requirePermission('CREATE_CLUB');
+  const deleteGuard = requirePermission('DELETE_CLUB');
+  const publishGuard = requirePermission('APPROVE_CLUB');
+  const statusGuard = requireStatusPermission('UPDATE_CLUB', 'APPROVE_CLUB');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/clubs

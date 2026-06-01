@@ -138,7 +138,6 @@ export class BlogService {
           reading_time: readingTime,
           is_featured: input.isFeatured ?? false,
           is_pinned: input.isPinned ?? false,
-          status: 'draft',
           created_by: context.actorId,
           updated_by: context.actorId
         })

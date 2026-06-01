@@ -1,5 +1,5 @@
-import { createDatabaseConnection } from './src/db/connection.js';
-import { ContentService } from './src/content/content-service.js';
+import { createDatabaseConnection } from '../../src/db/connection.js';
+import { ContentService } from '../../src/content/content-service.js';
 
 async function check() {
   const db = createDatabaseConnection({

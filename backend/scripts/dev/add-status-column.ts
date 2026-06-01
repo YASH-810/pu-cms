@@ -1,4 +1,4 @@
-import { createDatabaseConnection } from './src/db/connection.js';
+import { createDatabaseConnection } from '../../src/db/connection.js';
 
 async function addStatusColumn() {
   const db = createDatabaseConnection({

@@ -61,12 +61,12 @@ interface ListStoriesQuery {
 }
 
 export async function adminStoriesRoutes(app: FastifyInstance): Promise<void> {
-  const readGuard = requirePermission('REVIEW_CONTENT');
-  const writeGuard = requirePermission('REVIEW_CONTENT');
-  const createGuard = requirePermission('REVIEW_CONTENT');
-  const deleteGuard = requirePermission('REVIEW_CONTENT');
-  const publishGuard = requirePermission('APPROVE_CONTENT');
-  const statusGuard = requireStatusPermission('REVIEW_CONTENT', 'APPROVE_CONTENT');
+  const readGuard = requirePermission('UPDATE_STORY');
+  const writeGuard = requirePermission('UPDATE_STORY');
+  const createGuard = requirePermission('CREATE_STORY');
+  const deleteGuard = requirePermission('DELETE_STORY');
+  const publishGuard = requirePermission('APPROVE_STORY');
+  const statusGuard = requireStatusPermission('UPDATE_STORY', 'APPROVE_STORY');
 
   // ---------------------------------------------------------------------------
   // POST /api/v1/admin/stories

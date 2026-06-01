@@ -90,13 +90,14 @@ test('Google callback logs in a seeded active user, returns JWT context, and wri
     }
   });
 
-  assert.equal(response.statusCode, 200);
-  const body = response.json();
-  assert.equal(body.success, true);
-  assert.equal(body.errors.length, 0);
-  assert.equal(body.data.user.email, testEmail);
-  assert.equal(body.data.globalRoles[0].name, 'SUPER_ADMIN');
-  assert.equal(typeof body.data.token, 'string');
+  assert.equal(response.statusCode, 302);
+  const location = response.headers.location;
+  assert.equal(typeof location, 'string');
+  const redirectUrl = new URL(location as string);
+  assert.equal(redirectUrl.origin, 'http://localhost:4200');
+  assert.equal(redirectUrl.pathname, '/login');
+  const token = redirectUrl.searchParams.get('token');
+  assert.equal(typeof token, 'string');
 
   const logs = await app.db('user_login_logs').select('ip_address', 'user_agent').where({ user_id: userId });
   assert.equal(logs.length, 1);
@@ -107,7 +108,7 @@ test('Google callback logs in a seeded active user, returns JWT context, and wri
     method: 'GET',
     url: '/api/v1/admin/auth/me',
     headers: {
-      authorization: `Bearer ${body.data.token}`
+      authorization: `Bearer ${token}`
     }
   });
 
@@ -133,11 +134,13 @@ test('Google callback rejects an unknown Google email with 401', async () => {
     }
   });
 
-  assert.equal(response.statusCode, 401);
-  const body = response.json();
-  assert.equal(body.success, false);
-  assert.equal(body.data.constructor, Object);
-  assert.equal(body.errors[0].code, 'UNAUTHENTICATED');
+  assert.equal(response.statusCode, 302);
+  const location = response.headers.location;
+  assert.equal(typeof location, 'string');
+  const redirectUrl = new URL(location as string);
+  assert.equal(redirectUrl.origin, 'http://localhost:4200');
+  assert.equal(redirectUrl.pathname, '/login');
+  assert.match(redirectUrl.searchParams.get('auth_error') ?? '', /Access denied|not authorized/i);
 
   const logs = await app.db('user_login_logs').whereIn('user_id', app.db('users').select('id').where({ email: unknownEmail }));
   assert.equal(logs.length, 0);

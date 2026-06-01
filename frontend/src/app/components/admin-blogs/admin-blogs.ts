@@ -10,7 +10,7 @@ import { ToastService } from '../../services/toast.service';
 
 type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'rejected';
 
-type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unpublish';
+type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unpublish' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
   submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
@@ -18,7 +18,8 @@ const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: stri
   reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
   publish: { status: 'published', label: 'Publish', class: 'success-button' },
   archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
-  unpublish: { status: 'draft', label: 'Unpublish', class: 'ghost-button' }
+  unpublish: { status: 'draft', label: 'Unpublish', class: 'ghost-button' },
+  unarchive: { status: 'draft', label: 'Unarchive', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
@@ -27,6 +28,7 @@ function availableActions(status: string): WorkflowAction[] {
     case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
     case 'rejected': return ['submit'];
+    case 'archived': return ['unarchive'];
     default: return [];
   }
 }
@@ -659,7 +661,11 @@ export class AdminBlogs implements OnInit {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
   availableActions(status: string): WorkflowAction[] {
-    return availableActions(status);
+    const actions = availableActions(status);
+    if (this.isEditor() && status === 'archived') {
+      return actions.filter(a => a !== 'unarchive');
+    }
+    return actions;
   }
 
   statusClass(status: string): string {

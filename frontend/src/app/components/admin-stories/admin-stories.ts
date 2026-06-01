@@ -8,14 +8,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 
 type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'rejected';
-type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive';
+type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
   submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
   approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
   reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
   publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' }
+  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
+  unarchive: { status: 'draft',     label: 'Unarchive',         class: 'ghost-button'   }
 };
 
 function availableActions(status: string): WorkflowAction[] {
@@ -24,6 +25,7 @@ function availableActions(status: string): WorkflowAction[] {
     case 'review':    return ['approve', 'reject'];
     case 'published': return ['archive'];
     case 'rejected':  return ['submit'];
+    case 'archived':  return ['unarchive'];
     default:          return [];
   }
 }
@@ -725,7 +727,11 @@ export class AdminStories implements OnInit {
 
   // ─── Helper utilities ──────────────────────────────────────────────────
   availableActions(status: string): WorkflowAction[] {
-    return availableActions(status);
+    const actions = availableActions(status);
+    if (this.isEditor() && status === 'archived') {
+      return actions.filter(a => a !== 'unarchive');
+    }
+    return actions;
   }
 
   statusClass(status: string): string {

@@ -17,9 +17,9 @@ import { NotificationsService } from '../../services/notifications.service';
       <aside class="sidebar">
         <div class="sidebar-scrollable-content">
           <div class="brand-row">
-            <img src="/uni-logo.png" class="brand-logo" alt="University Logo">
+            <img src="/uni-logo.png" class="brand-logo" alt="Logo">
             <div class="brand-copy">
-              <strong>University CMS</strong>
+              <strong>{{ auth.isSchoolAdmin() ? 'School CMS' : 'University CMS' }}</strong>
               <span>Governance Console</span>
             </div>
           </div>
@@ -499,6 +499,7 @@ export class AdminLayout {
   readonly filteredNavItems = computed(() => {
     const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
     const isSuperAdmin = roles.includes('SUPER_ADMIN') || roles.includes('UNIVERSITY_ADMIN');
+    const isSchoolAdmin = this.auth.isSchoolAdmin();
     
     let items: any[] = [
       { path: '/admin/dashboard', label: 'Dashboard' },
@@ -524,10 +525,16 @@ export class AdminLayout {
       );
     }
 
+    if (isSuperAdmin || isSchoolAdmin) {
+      items.push({ path: '/admin/users', label: 'Users' });
+    }
+
+    if (isSuperAdmin || isSchoolAdmin) {
+      items.push({ path: '/admin/organizations', label: 'Organizations' });
+    }
+
     if (isSuperAdmin) {
       items.push(
-        { path: '/admin/users', label: 'Users' },
-        { path: '/admin/organizations', label: 'Organizations' },
         { path: '/admin/taxonomies', label: 'Taxonomy' },
         { path: '/admin/notifications', label: 'Notifications' }
       );

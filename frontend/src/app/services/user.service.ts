@@ -54,7 +54,7 @@ export class UserService {
     );
   }
 
-  createUser(user: Partial<User> & { global_roles?: string[] }): Observable<User> {
+  createUser(user: Partial<User> & { global_roles?: string[]; role_id?: string; organization_id?: string }): Observable<User> {
     return this.http.post<ApiResponse<User>>(this.baseUrl, user).pipe(
       map(res => res.data)
     );

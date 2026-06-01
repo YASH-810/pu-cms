@@ -12,6 +12,17 @@ export interface AuthUser {
   lastLoginAt: string | null;
 }
 
+export interface OrganizationScope {
+  organizationId: string;
+  organizationName: string;
+  organizationSlug: string;
+  organizationType: string;
+  roleId: string;
+  roleName: string;
+  assignedFrom: string | null;
+  assignedTo: string | null;
+}
+
 export interface AuthContext {
   token?: string;
   user: AuthUser;
@@ -21,7 +32,7 @@ export interface AuthContext {
     description: string | null;
     hierarchyLevel: number;
   }>;
-  organizationScope: unknown[];
+  organizationScope: OrganizationScope[];
 }
 
 @Injectable({
@@ -35,6 +46,20 @@ export class AuthService {
   readonly token = computed(() => this.tokenSignal());
   readonly context = computed(() => this.contextSignal());
   readonly isAuthenticated = computed(() => Boolean(this.tokenSignal()));
+
+  readonly isUniversityAdmin = computed(() => {
+    const roles = this.contextSignal()?.globalRoles?.map(r => r.name) || [];
+    return roles.includes('SUPER_ADMIN') || roles.includes('UNIVERSITY_ADMIN');
+  });
+
+  readonly isSchoolAdmin = computed(() => {
+    const roles = this.contextSignal()?.globalRoles?.map(r => r.name) || [];
+    return roles.includes('SCHOOL_ADMIN');
+  });
+
+  readonly orgScope = computed(() => {
+    return this.contextSignal()?.organizationScope || [];
+  });
 
   constructor(private readonly http: HttpClient) {}
 

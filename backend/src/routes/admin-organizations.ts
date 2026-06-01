@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { Knex } from 'knex';
-import { requirePermission } from '../auth/authorization.js';
-import { badRequest, conflict, notFound } from '../http/api-error.js';
+import { requirePermission, resolvePermission } from '../auth/authorization.js';
+import { badRequest, conflict, notFound, forbidden, unauthenticated } from '../http/api-error.js';
 
 interface OrgQueryParams {
   search?: string;
@@ -40,8 +40,6 @@ async function wouldCreateCycle(db: Knex, orgId: string, parentId: string): Prom
   if (!parentId) return false;
   if (orgId === parentId) return true;
 
-  // Recursively fetch all descendants of orgId.
-  // If parentId is one of these descendants, a cycle will be created!
   const descendantsResult = await db.raw(`
     WITH RECURSIVE descendants AS (
       SELECT id, parent_id FROM organizations WHERE id = ? AND deleted_at IS NULL
@@ -57,16 +55,84 @@ async function wouldCreateCycle(db: Knex, orgId: string, parentId: string): Prom
 }
 
 export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<void> {
-  const guard = requirePermission('MANAGE_USERS');
+  async function getUserHierarchyLevel(db: Knex, userId: string): Promise<number> {
+    const globalRoles = await db('user_roles as ur')
+      .join('roles as r', 'r.id', 'ur.role_id')
+      .where('ur.user_id', userId)
+      .whereNull('ur.deleted_at')
+      .whereNull('r.deleted_at')
+      .select('r.hierarchy_level');
+
+    const orgRoles = await db('user_organization_roles as uor')
+      .join('roles as r', 'r.id', 'uor.role_id')
+      .where({
+        'uor.user_id': userId,
+        'uor.is_active': true
+      })
+      .whereNull('uor.deleted_at')
+      .whereNull('r.deleted_at')
+      .select('r.hierarchy_level');
+
+    const allLevels = [...globalRoles, ...orgRoles].map(r => Number(r.hierarchy_level));
+    if (allLevels.length === 0) return 99;
+    return Math.min(...allLevels);
+  }
+
+  async function getScopedOrgIds(db: Knex, userId: string): Promise<string[]> {
+    const userOrgIds = await db('user_organization_roles as uor')
+      .where({
+        'uor.user_id': userId,
+        'uor.is_active': true
+      })
+      .whereNull('uor.deleted_at')
+      .pluck('uor.organization_id');
+
+    if (userOrgIds.length === 0) return [];
+
+    const descendantsResult = await db.raw(`
+      WITH RECURSIVE descendants AS (
+        SELECT id, parent_id FROM organizations WHERE id IN (${userOrgIds.map(() => '?').join(',')}) AND deleted_at IS NULL
+        UNION ALL
+        SELECT o.id, o.parent_id FROM organizations o
+        INNER JOIN descendants d ON o.parent_id = d.id
+        WHERE o.deleted_at IS NULL
+      )
+      SELECT id FROM descendants
+    `, userOrgIds);
+    return descendantsResult.rows.map((row: any) => String(row.id));
+  }
+
+  const checkReadPermission = async (request: FastifyRequest) => {
+    let payload;
+    try {
+      payload = await request.jwtVerify<{ sub: string }>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+
+    const userId = payload.sub;
+    const userLevel = await getUserHierarchyLevel(app.db, userId);
+    if (userLevel < 99) return;
+
+    throw forbidden('No explicit permission found for requested context');
+  };
+
+  async function isOrgInUserScope(db: Knex, userId: string, targetOrgId: string): Promise<boolean> {
+    const userLevel = await getUserHierarchyLevel(db, userId);
+    if (userLevel <= 2) return true; // Global admin has access to all
+
+    const scopedIds = await getScopedOrgIds(db, userId);
+    return scopedIds.includes(targetOrgId);
+  }
 
   // List Organizations (flat list)
-  app.get<{ Querystring: OrgQueryParams }>('/api/v1/admin/organizations', { preHandler: [guard] }, async (request) => {
+  app.get<{ Querystring: OrgQueryParams }>('/api/v1/admin/organizations', { preHandler: [checkReadPermission] }, async (request) => {
     const { search, is_active, org_type } = request.query;
 
     let query = app.db('organizations').whereNull('deleted_at');
 
     if (search) {
-      query = query.where((builder) => {
+      query = query.where((builder: any) => {
         builder.whereILike('name', `%${search}%`)
           .orWhereILike('slug', `%${search}%`)
           .orWhereILike('short_name', `%${search}%`)
@@ -87,7 +153,7 @@ export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<vo
   });
 
   // Get Organization Tree Hierarchy
-  app.get('/api/v1/admin/organizations/tree', { preHandler: [guard] }, async () => {
+  app.get('/api/v1/admin/organizations/tree', { preHandler: [checkReadPermission] }, async () => {
     const organizations = await app.db('organizations')
       .select('id', 'name', 'org_type', 'slug', 'is_active', 'parent_id')
       .whereNull('deleted_at')
@@ -130,8 +196,20 @@ export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<vo
   });
 
   // Get Organization Details
-  app.get<{ Params: { id: string } }>('/api/v1/admin/organizations/:id', { preHandler: [guard] }, async (request) => {
+  app.get<{ Params: { id: string } }>('/api/v1/admin/organizations/:id', {}, async (request) => {
+    let payload;
+    try {
+      payload = await request.jwtVerify<{ sub: string }>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+    const userId = payload.sub;
     const { id } = request.params;
+
+    const isScoped = await isOrgInUserScope(app.db, userId, id);
+    if (!isScoped) {
+      throw forbidden('No explicit permission found for requested context');
+    }
 
     const org = await app.db('organizations').where({ id }).whereNull('deleted_at').first();
     if (!org) {
@@ -142,11 +220,29 @@ export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<vo
   });
 
   // Create Organization
-  app.post<{ Body: CreateOrgBody }>('/api/v1/admin/organizations', { preHandler: [guard] }, async (request) => {
+  app.post<{ Body: CreateOrgBody }>('/api/v1/admin/organizations', {}, async (request) => {
+    let payload;
+    try {
+      payload = await request.jwtVerify<{ sub: string }>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+    const userId = payload.sub;
     const data = request.body;
 
     if (!data.name || !data.org_type || !data.slug) {
       throw badRequest('Name, organization type, and slug are required');
+    }
+
+    const userLevel = await getUserHierarchyLevel(app.db, userId);
+    if (userLevel > 2) {
+      if (!data.parent_id) {
+        throw badRequest('Parent organization is required');
+      }
+      const isScoped = await isOrgInUserScope(app.db, userId, data.parent_id);
+      if (!isScoped) {
+        throw forbidden('No explicit permission found for requested context');
+      }
     }
 
     // Check slug uniqueness
@@ -191,9 +287,33 @@ export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<vo
   });
 
   // Update Organization
-  app.put<{ Params: { id: string }; Body: CreateOrgBody }>('/api/v1/admin/organizations/:id', { preHandler: [guard] }, async (request) => {
+  app.put<{ Params: { id: string }; Body: CreateOrgBody }>('/api/v1/admin/organizations/:id', {}, async (request) => {
+    let payload;
+    try {
+      payload = await request.jwtVerify<{ sub: string }>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+    const userId = payload.sub;
     const { id } = request.params;
     const data = request.body;
+
+    const userLevel = await getUserHierarchyLevel(app.db, userId);
+    const isScoped = await isOrgInUserScope(app.db, userId, id);
+    if (!isScoped) {
+      throw forbidden('No explicit permission found for requested context');
+    }
+
+    if (userLevel > 2) {
+      if (data.parent_id !== undefined && data.parent_id !== null) {
+        const isParentScoped = await isOrgInUserScope(app.db, userId, data.parent_id);
+        if (!isParentScoped) {
+          throw forbidden('No explicit permission found for requested context');
+        }
+      } else if (data.parent_id === null) {
+        throw badRequest('Scoped administrators cannot remove the parent organization');
+      }
+    }
 
     const org = await app.db('organizations').where({ id }).whereNull('deleted_at').first();
     if (!org) {
@@ -250,12 +370,24 @@ export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<vo
   });
 
   // Toggle active status
-  app.patch<{ Params: { id: string }; Body: { is_active: boolean } }>('/api/v1/admin/organizations/:id/status', { preHandler: [guard] }, async (request) => {
+  app.patch<{ Params: { id: string }; Body: { is_active: boolean } }>('/api/v1/admin/organizations/:id/status', {}, async (request) => {
+    let payload;
+    try {
+      payload = await request.jwtVerify<{ sub: string }>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+    const userId = payload.sub;
     const { id } = request.params;
     const { is_active } = request.body;
 
     if (is_active === undefined) {
       throw badRequest('is_active value is required');
+    }
+
+    const isScoped = await isOrgInUserScope(app.db, userId, id);
+    if (!isScoped) {
+      throw forbidden('No explicit permission found for requested context');
     }
 
     const org = await app.db('organizations').where({ id }).whereNull('deleted_at').first();
@@ -273,8 +405,20 @@ export async function adminOrganizationsRoutes(app: FastifyInstance): Promise<vo
   });
 
   // Soft Delete Organization
-  app.delete<{ Params: { id: string } }>('/api/v1/admin/organizations/:id', { preHandler: [guard] }, async (request) => {
+  app.delete<{ Params: { id: string } }>('/api/v1/admin/organizations/:id', {}, async (request) => {
+    let payload;
+    try {
+      payload = await request.jwtVerify<{ sub: string }>();
+    } catch {
+      throw unauthenticated('Valid authentication token is required');
+    }
+    const userId = payload.sub;
     const { id } = request.params;
+
+    const isScoped = await isOrgInUserScope(app.db, userId, id);
+    if (!isScoped) {
+      throw forbidden('No explicit permission found for requested context');
+    }
 
     const org = await app.db('organizations').where({ id }).whereNull('deleted_at').first();
     if (!org) {

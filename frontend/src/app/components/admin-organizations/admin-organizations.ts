@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Organization, OrgTreeNode, OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-organizations',
@@ -106,8 +107,8 @@ import { ToastService } from '../../services/toast.service';
               </label>
               <label class="form-field">
                 <span>Organization Type</span>
-                <select [(ngModel)]="formOrg.org_type" name="orgType">
-                  @for (type of orgTypes; track type.value) {
+                <select [(ngModel)]="formOrg.org_type" (ngModelChange)="onOrgTypeChange($event)" name="orgType">
+                  @for (type of getAvailableOrgTypes(); track type.value) {
                     <option [value]="type.value">{{ type.label }}</option>
                   }
                 </select>
@@ -117,7 +118,9 @@ import { ToastService } from '../../services/toast.service';
             <label class="form-field">
               <span>Parent Organization</span>
               <select [(ngModel)]="formOrg.parent_id" name="parentId">
-                <option [ngValue]="null">None</option>
+                @if (!auth.isSchoolAdmin()) {
+                  <option [ngValue]="null">None</option>
+                }
                 @for (parent of filteredParentOrgs(); track parent.id) {
                   <option [value]="parent.id">{{ parent.name }} ({{ parent.org_type }})</option>
                 }
@@ -150,6 +153,7 @@ import { ToastService } from '../../services/toast.service';
 export class AdminOrganizations implements OnInit {
   private readonly orgService = inject(OrganizationService);
   private readonly toast = inject(ToastService);
+  readonly auth = inject(AuthService);
 
   treeNodes = signal<OrgTreeNode[]>([]);
   flatOrganizations = signal<Organization[]>([]);
@@ -180,7 +184,12 @@ export class AdminOrganizations implements OnInit {
     this.isLoading.set(true);
     this.orgService.getOrganizationTree().subscribe({
       next: (nodes) => {
-        this.treeNodes.set(nodes);
+        if (this.auth.isSchoolAdmin()) {
+          const scopedIds = this.auth.orgScope().map(o => o.organizationId);
+          this.treeNodes.set(this.filterTree(nodes, scopedIds));
+        } else {
+          this.treeNodes.set(nodes);
+        }
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -190,9 +199,40 @@ export class AdminOrganizations implements OnInit {
     });
   }
 
+  private filterTree(nodes: OrgTreeNode[], scopedIds: string[]): OrgTreeNode[] {
+    const result: OrgTreeNode[] = [];
+    const search = (node: OrgTreeNode) => {
+      if (scopedIds.includes(node.id)) {
+        result.push(node);
+        return;
+      }
+      node.children?.forEach(search);
+    };
+    nodes.forEach(search);
+    return result;
+  }
+
   loadFlatOrgs() {
     this.orgService.listOrganizations().subscribe({
-      next: (orgs) => this.flatOrganizations.set(orgs),
+      next: (orgs) => {
+        if (this.auth.isSchoolAdmin()) {
+          const scopedIds = this.auth.orgScope().map(o => o.organizationId);
+          const allowedOrgs = orgs.filter(org => {
+            let current: Organization | undefined = org;
+            while (current) {
+              if (scopedIds.includes(current.id)) {
+                return true;
+              }
+              const parentOrgId: string | null = current.parent_id;
+              current = parentOrgId ? orgs.find(o => o.id === parentOrgId) : undefined;
+            }
+            return false;
+          });
+          this.flatOrganizations.set(allowedOrgs);
+        } else {
+          this.flatOrganizations.set(orgs);
+        }
+      },
       error: () => undefined
     });
   }
@@ -246,9 +286,45 @@ export class AdminOrganizations implements OnInit {
     });
   }
 
+  getAvailableOrgTypes() {
+    const currentType = this.formOrg?.org_type;
+    if (this.auth.isSchoolAdmin()) {
+      return this.orgTypes.filter(type => 
+        type.value === currentType || (
+          type.value !== 'university' && 
+          type.value !== 'school' && 
+          type.value !== 'exam_cell' && 
+          type.value !== 'sports'
+        )
+      );
+    }
+    return this.orgTypes;
+  }
+
+  onOrgTypeChange(newType: string) {
+    if (this.auth.isSchoolAdmin()) {
+      this.formOrg.org_type = newType;
+      const allowed = this.filteredParentOrgs();
+      const currentParentId = this.formOrg.parent_id;
+      if (!currentParentId || !allowed.some(org => org.id === currentParentId)) {
+        this.formOrg.parent_id = allowed.length > 0 ? allowed[0].id : null;
+      }
+    }
+  }
+
   openCreateModal() {
     this.isEditMode.set(false);
-    this.formOrg = { ...this.emptyOrg(), parent_id: this.selectedOrg()?.id ?? null };
+    this.formOrg = this.emptyOrg();
+    
+    // Auto-select first valid parent for school admin
+    const allowed = this.filteredParentOrgs();
+    const selectedId = this.selectedOrg()?.id;
+    if (selectedId && allowed.some(org => org.id === selectedId)) {
+      this.formOrg.parent_id = selectedId;
+    } else {
+      this.formOrg.parent_id = allowed.length > 0 ? allowed[0].id : null;
+    }
+
     this.showFormModal.set(true);
   }
 
@@ -265,6 +341,11 @@ export class AdminOrganizations implements OnInit {
   submitForm() {
     if (!this.formOrg.name || !this.formOrg.slug) {
       this.toast.error('Validation failed', 'Name and slug are required.');
+      return;
+    }
+
+    if (this.auth.isSchoolAdmin() && !this.formOrg.parent_id) {
+      this.toast.error('Validation failed', 'Parent organization is required.');
       return;
     }
 

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { OrganizationService, Organization } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
 import { User, UserDetails, UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -117,20 +118,27 @@ import { User, UserDetails, UserService } from '../../services/user.service';
               <input [(ngModel)]="newUser.full_name" name="fullName" placeholder="Jane Doe" required />
             </label>
 
-            <div class="form-field">
-              <span>Global Roles</span>
-              <div class="role-grid">
-                @for (role of availableRoles(); track role.id) {
-                  <label class="role-option">
-                    <input type="checkbox" [checked]="isRoleSelectedForNewUser(role.id)" (change)="toggleRoleForNewUser(role.id)" />
-                    <span>
-                      <strong>{{ role.name }}</strong>
-                      <small>{{ role.description }}</small>
-                    </span>
-                  </label>
+            <label class="form-field">
+              <span>Role</span>
+              <select [(ngModel)]="newUser.role_id" name="roleId" required>
+                <option value="">Select role</option>
+                @for (role of getFilteredRoles(); track role.id) {
+                  <option [value]="role.id">{{ role.name }}</option>
                 }
-              </div>
-            </div>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>Organization {{ auth.isSchoolAdmin() ? '' : '(Optional)' }}</span>
+              <select [(ngModel)]="newUser.organization_id" name="organizationId" required>
+                @if (!auth.isSchoolAdmin()) {
+                  <option value="">None (Global Role)</option>
+                }
+                @for (org of organizations(); track org.id) {
+                  <option [value]="org.id">{{ org.name }}</option>
+                }
+              </select>
+            </label>
 
             <footer>
               <button type="button" class="ghost-button" (click)="closeCreateModal()">Cancel</button>
@@ -152,20 +160,22 @@ import { User, UserDetails, UserService } from '../../services/user.service';
             </header>
 
             <div class="detail-grid">
-              <section>
-                <h3>Global Roles</h3>
-                <div class="role-grid">
-                  @for (role of availableRoles(); track role.id) {
-                    <label class="role-option">
-                      <input type="checkbox" [checked]="hasGlobalRole(role.id)" (change)="toggleGlobalRole(role.id)" />
-                      <span><strong>{{ role.name }}</strong><small>{{ role.description }}</small></span>
-                    </label>
-                  }
-                </div>
-                <button type="button" class="primary-button full" (click)="saveGlobalRoles()">Save Roles</button>
-              </section>
+              @if (!auth.isSchoolAdmin()) {
+                <section>
+                  <h3>Global Roles</h3>
+                  <div class="role-grid">
+                    @for (role of getFilteredRoles(); track role.id) {
+                      <label class="role-option">
+                        <input type="checkbox" [checked]="hasGlobalRole(role.id)" (change)="toggleGlobalRole(role.id)" />
+                        <span><strong>{{ role.name }}</strong><small>{{ role.description }}</small></span>
+                      </label>
+                    }
+                  </div>
+                  <button type="button" class="primary-button full" (click)="saveGlobalRoles()">Save Roles</button>
+                </section>
+              }
 
-              <section>
+              <section [style.gridColumn]="auth.isSchoolAdmin() ? 'span 2' : 'span 1'">
                 <h3>Organization Scope</h3>
                 <div class="scope-list">
                   @if (detail.organization_roles.length === 0) {
@@ -174,7 +184,7 @@ import { User, UserDetails, UserService } from '../../services/user.service';
                     @for (scope of detail.organization_roles; track scope.organization_id + scope.role_id) {
                       <div class="scope-row">
                         <strong>{{ scope.organization_name }}</strong>
-                        <span>{{ scope.role_name }}</span>
+                        <span>{{ scope.role_name.replace('_', ' ') | titlecase }}</span>
                       </div>
                     }
                   }
@@ -188,7 +198,7 @@ import { User, UserDetails, UserService } from '../../services/user.service';
                   </select>
                   <select [(ngModel)]="newScope.role_id">
                     <option value="">Select role</option>
-                    @for (role of availableRoles(); track role.id) {
+                    @for (role of getFilteredRoles(); track role.id) {
                       <option [value]="role.id">{{ role.name }}</option>
                     }
                   </select>
@@ -207,6 +217,7 @@ export class AdminUsers implements OnInit {
   private readonly userService = inject(UserService);
   private readonly orgService = inject(OrganizationService);
   private readonly toast = inject(ToastService);
+  readonly auth = inject(AuthService);
 
   users = signal<User[]>([]);
   organizations = signal<Organization[]>([]);
@@ -219,7 +230,7 @@ export class AdminUsers implements OnInit {
   statusFilter = 'all';
   showCreateModal = signal(false);
   selectedUserDetails = signal<UserDetails | null>(null);
-  newUser = { email: '', full_name: '', global_roles: [] as string[] };
+  newUser = { email: '', full_name: '', role_id: '', organization_id: '' };
   newScope = { organization_id: '', role_id: '' };
   activeRowDropdown = signal<string | null>(null);
 
@@ -259,7 +270,23 @@ export class AdminUsers implements OnInit {
 
   loadOrganizations() {
     this.orgService.listOrganizations(undefined, true).subscribe({
-      next: (orgs) => this.organizations.set(orgs),
+      next: (orgs) => {
+        if (this.auth.isSchoolAdmin()) {
+          const scopedIds = this.auth.orgScope().map(o => o.organizationId);
+          const allowed = orgs.filter(org => {
+            let current: Organization | undefined = org;
+            while (current) {
+              if (scopedIds.includes(current.id)) return true;
+              const pId: string | null = current.parent_id;
+              current = pId ? orgs.find(o => o.id === pId) : undefined;
+            }
+            return false;
+          });
+          this.organizations.set(allowed);
+        } else {
+          this.organizations.set(orgs);
+        }
+      },
       error: () => undefined
     });
   }
@@ -286,8 +313,41 @@ export class AdminUsers implements OnInit {
     this.loadUsers();
   }
 
+  getCurrentUserHierarchyLevel(): number {
+    const context = this.auth.context();
+    if (!context) return 99;
+
+    const globalLevels = context.globalRoles?.map(r => r.hierarchyLevel) || [];
+    const scopedLevels = context.organizationScope?.map(scope => {
+      const name = scope.roleName;
+      if (name === 'SUPER_ADMIN') return 1;
+      if (name === 'UNIVERSITY_ADMIN') return 2;
+      if (name === 'SCHOOL_ADMIN') return 3;
+      if (name === 'EDITOR') return 4;
+      if (name === 'REVIEWER') return 5;
+      if (name === 'CONTENT_CREATOR') return 6;
+      return 99;
+    }) || [];
+
+    const allLevels = [...globalLevels, ...scopedLevels];
+    if (allLevels.length === 0) return 99;
+    return Math.min(...allLevels);
+  }
+
+  getFilteredRoles() {
+    const roles = this.availableRoles();
+    const userLevel = this.getCurrentUserHierarchyLevel();
+    return roles.filter(role => role.hierarchy_level >= userLevel);
+  }
+
   openCreateModal() {
-    this.newUser = { email: '', full_name: '', global_roles: [] };
+    const defaultOrgId = this.auth.isSchoolAdmin() && this.organizations().length > 0
+      ? this.organizations()[0].id
+      : '';
+    const defaultRoleId = this.getFilteredRoles().length > 0
+      ? this.getFilteredRoles()[0].id
+      : '';
+    this.newUser = { email: '', full_name: '', role_id: defaultRoleId, organization_id: defaultOrgId };
     this.showCreateModal.set(true);
   }
 
@@ -296,8 +356,13 @@ export class AdminUsers implements OnInit {
   }
 
   submitCreateUser() {
-    if (!this.newUser.email || !this.newUser.full_name) {
-      this.toast.error('Validation failed', 'Email and full name are required.');
+    if (!this.newUser.email || !this.newUser.full_name || !this.newUser.role_id) {
+      this.toast.error('Validation failed', 'Email, full name, and role are required.');
+      return;
+    }
+
+    if (this.auth.isSchoolAdmin() && !this.newUser.organization_id) {
+      this.toast.error('Validation failed', 'Organization is required.');
       return;
     }
 
@@ -341,16 +406,6 @@ export class AdminUsers implements OnInit {
 
   closeDetailsModal() {
     this.selectedUserDetails.set(null);
-  }
-
-  isRoleSelectedForNewUser(roleId: string): boolean {
-    return this.newUser.global_roles.includes(roleId);
-  }
-
-  toggleRoleForNewUser(roleId: string) {
-    const idx = this.newUser.global_roles.indexOf(roleId);
-    if (idx >= 0) this.newUser.global_roles.splice(idx, 1);
-    else this.newUser.global_roles.push(roleId);
   }
 
   hasGlobalRole(roleId: string): boolean {

@@ -13,21 +13,21 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unpublish';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unpublish: { status: 'draft',     label: 'Unpublish',         class: 'ghost-button'   }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unpublish: { status: 'draft', label: 'Unpublish', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    default: return [];
   }
 }
 
@@ -391,28 +391,28 @@ export class AdminBlogs implements OnInit {
   });
 
   // ─── State ────────────────────────────────────────────────────────────────
-  blogs         = signal<Blog[]>([]);
-  total         = signal(0);
-  loading       = signal(false);
-  saving        = signal(false);
+  blogs = signal<Blog[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm    = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
   currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics (counts from current full listing) ───────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Lists for selection ─────────────────────────────────────────────────
   activeUsers = signal<User[]>([]);
-  activeOrgs  = signal<Organization[]>([]);
+  activeOrgs = signal<Organization[]>([]);
 
   // ─── Form modal ──────────────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -427,11 +427,11 @@ export class AdminBlogs implements OnInit {
   } = this.emptyForm();
 
   // ─── Status modal ─────────────────────────────────────────────────────────
-  showStatusModal  = signal(false);
-  statusTarget     = signal<Blog | null>(null);
-  pendingAction    = signal<WorkflowAction>('submit');
-  pendingStatus    = signal('');
-  statusRemarks    = '';
+  showStatusModal = signal(false);
+  statusTarget = signal<Blog | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
   activeRowDropdown = signal<string | null>(null);
 
   toggleRowDropdown(id: string) {
@@ -468,10 +468,10 @@ export class AdminBlogs implements OnInit {
   loadBlogs() {
     this.loading.set(true);
     this.blogsService.listBlogs({
-      status:  this.statusFilter || undefined,
-      search:  this.searchTerm   || undefined,
-      limit:   this.pageSize,
-      offset:  this.currentOffset()
+      status: this.statusFilter || undefined,
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.blogs.set(res.blogs);
@@ -530,21 +530,21 @@ export class AdminBlogs implements OnInit {
     this.isEditMode.set(true);
     this.editingId.set(blog.id);
     this.form = {
-      title:           blog.title,
-      slug:            blog.slug,
-      summary:         blog.summary ?? '',
-      body_html:       blog.body_html ?? '',
-      hero_image_url:  blog.hero_image_url ?? '',
-      author_id:       blog.author_id,
+      title: blog.title,
+      slug: blog.slug,
+      summary: blog.summary ?? '',
+      body_html: blog.body_html ?? '',
+      hero_image_url: blog.hero_image_url ?? '',
+      author_id: blog.author_id,
       organization_id: null, // Scoped org relation cannot be directly edited after creation
-      is_featured:     blog.is_featured,
-      is_pinned:       blog.is_pinned
+      is_featured: blog.is_featured,
+      is_pinned: blog.is_pinned
     };
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { 
-    this.showFormModal.set(false); 
+  closeFormModal() {
+    this.showFormModal.set(false);
     const params = this.route.snapshot.queryParams;
     if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
@@ -566,14 +566,14 @@ export class AdminBlogs implements OnInit {
     this.saving.set(true);
 
     const payload = {
-      title:           this.form.title.trim(),
-      slug:            this.form.slug.trim(),
-      summary:         this.form.summary.trim() || null,
-      body_html:       this.form.body_html || null,
-      hero_image_url:  this.form.hero_image_url.trim() || null,
-      author_id:       this.form.author_id,
-      is_featured:     this.form.is_featured,
-      is_pinned:       this.form.is_pinned
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
+      summary: this.form.summary.trim() || null,
+      body_html: this.form.body_html || null,
+      hero_image_url: this.form.hero_image_url.trim() || null,
+      author_id: this.form.author_id,
+      is_featured: this.form.is_featured,
+      is_pinned: this.form.is_pinned
     };
 
     if (this.isEditMode()) {
@@ -665,11 +665,11 @@ export class AdminBlogs implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 

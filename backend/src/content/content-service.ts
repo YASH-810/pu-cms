@@ -49,8 +49,8 @@ interface AutosaveDraftInput {
 const allowedTransitions: Record<ContentStatus, ContentStatus[]> = {
   draft: ['review', 'archived'],
   review: ['published', 'rejected', 'archived'],
-  published: ['archived'],
-  archived: [],
+  published: ['review', 'archived'],
+  archived: ['draft'],
   rejected: ['draft', 'archived']
 };
 
@@ -138,6 +138,7 @@ export class ContentService {
       if (input.title !== undefined) updatePayload.title = input.title;
       if (input.slug !== undefined) updatePayload.slug = input.slug;
       if (input.payload !== undefined) updatePayload.payload = input.payload;
+      if (existing.status === 'published') updatePayload.status = 'review';
 
       const [updated] = await trx('content_entities')
         .where({ id: input.entityId })
@@ -145,6 +146,25 @@ export class ContentService {
         .returning('*');
 
       await this.writeAuditLog(trx, contentType.id, input.entityId, 'update', existing, updated, context);
+      if (existing.status === 'published') {
+        await trx('entity_approval_logs').insert({
+          content_type_id: contentType.id,
+          entity_id: input.entityId,
+          status_from: 'published',
+          status_to: 'review',
+          remarks: 'Updated content returned for review',
+          created_by: context.actorId
+        });
+        await this.writeAuditLog(trx, contentType.id, input.entityId, 'status_change', existing, updated, context);
+        const notificationService = new NotificationService(trx);
+        await notificationService.triggerWorkflowNotification(
+          input.entityId,
+          input.contentTypeSlug,
+          'submit',
+          'Updated content returned for review',
+          context.actorId
+        );
+      }
       return updated;
     });
 
@@ -271,8 +291,16 @@ export class ContentService {
     const query = this.db('content_entities as ce')
       .join('content_types as ct', 'ce.content_type_id', 'ct.id')
       .leftJoin('users as u', 'ce.created_by', 'u.id')
+      .leftJoin('pages as p', 'p.entity_id', 'ce.id')
+      .leftJoin('blogs as b', 'b.entity_id', 'ce.id')
+      .leftJoin('events as e', 'e.entity_id', 'ce.id')
+      .leftJoin('announcements as an', 'an.entity_id', 'ce.id')
+      .leftJoin('achievements as ac', 'ac.entity_id', 'ce.id')
+      .leftJoin('stories as st', 'st.entity_id', 'ce.id')
+      .leftJoin('club_details as cd', 'cd.entity_id', 'ce.id')
       .select(
         'ce.id',
+        this.db.raw('COALESCE(p.id, b.id, e.id, an.id, ac.id, st.id, cd.id, ce.id) as module_id'),
         'ce.title',
         'ce.slug',
         'ce.status',

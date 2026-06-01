@@ -16,8 +16,8 @@ import { forkJoin } from 'rxjs';
     <div class="dashboard">
       <div class="page-header">
         <div>
-          <h1 class="page-title">{{ auth.isUniversityAdmin() ? 'Command Center' : 'School Dashboard' }}</h1>
-          <p class="page-subtitle">{{ auth.isUniversityAdmin() ? 'Governance overview and system health at a glance' : 'Your school overview and content management' }}</p>
+          <h1 class="page-title">{{ dashboardTitle() }}</h1>
+          <p class="page-subtitle">{{ dashboardSubtitle() }}</p>
         </div>
         <div class="header-decoration">
           <div class="pulse-ring"></div>
@@ -26,9 +26,6 @@ import { forkJoin } from 'rxjs';
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════ -->
-      <!-- UNIVERSITY ADMIN: Global Stats                      -->
-      <!-- ═══════════════════════════════════════════════════ -->
       @if (auth.isUniversityAdmin()) {
         <div class="stats-grid">
           <div class="stat-card">
@@ -86,9 +83,6 @@ import { forkJoin } from 'rxjs';
         </div>
       }
 
-      <!-- ═══════════════════════════════════════════════════ -->
-      <!-- SCHOOL ADMIN: Scoped Stats                          -->
-      <!-- ═══════════════════════════════════════════════════ -->
       @if (auth.isSchoolAdmin()) {
         <div class="stats-grid stats-grid-3">
           <div class="stat-card">
@@ -132,16 +126,55 @@ import { forkJoin } from 'rxjs';
         </div>
       }
 
-      <!-- ═══════════════════════════════════════════════════ -->
-      <!-- QUICK ACTIONS (role-dependent)                      -->
-      <!-- ═══════════════════════════════════════════════════ -->
+      @if (isEditorDashboard()) {
+        <div class="stats-grid stats-grid-3">
+          <div class="stat-card">
+            <div class="stat-icon-wrapper cats">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12" />
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">My Content</span>
+              <span class="stat-value">{{ contentCount() }}</span>
+            </div>
+            <div class="stat-bg-glow cats-glow"></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-wrapper tags">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">In Review</span>
+              <span class="stat-value">{{ reviewCount() }}</span>
+            </div>
+            <div class="stat-bg-glow tags-glow"></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon-wrapper orgs">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Drafts & Updates</span>
+              <span class="stat-value">{{ draftCount() }}</span>
+            </div>
+            <div class="stat-bg-glow orgs-glow"></div>
+          </div>
+        </div>
+      }
+
       <div class="section-header">
         <h2 class="section-title">Quick Actions</h2>
         <div class="section-line"></div>
       </div>
       
       <div class="actions-grid">
-        <!-- University Admin actions -->
         @if (auth.isUniversityAdmin()) {
           <a routerLink="/admin/users" class="action-card">
             <div class="action-icon-bg users-bg">
@@ -183,7 +216,6 @@ import { forkJoin } from 'rxjs';
           </a>
         }
 
-        <!-- School Admin actions -->
         @if (auth.isSchoolAdmin()) {
           <a routerLink="/admin/content" class="action-card">
             <div class="action-icon-bg cats-bg">
@@ -224,11 +256,36 @@ import { forkJoin } from 'rxjs';
             </div>
           </a>
         }
+
+        @if (isEditorDashboard()) {
+          <a routerLink="/admin/content" class="action-card">
+            <div class="action-icon-bg cats-bg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25" /></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-title">My Content</span>
+              <span class="action-desc">Edit drafts and submit updates for review</span>
+            </div>
+            <div class="action-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+            </div>
+          </a>
+
+          <a routerLink="/admin/review-queue" class="action-card">
+            <div class="action-icon-bg users-bg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+            </div>
+            <div class="action-text">
+              <span class="action-title">Review Status</span>
+              <span class="action-desc">Track content currently awaiting approval</span>
+            </div>
+            <div class="action-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+            </div>
+          </a>
+        }
       </div>
 
-      <!-- ═══════════════════════════════════════════════════ -->
-      <!-- UNIVERSITY ADMIN: System Status                     -->
-      <!-- ═══════════════════════════════════════════════════ -->
       @if (auth.isUniversityAdmin()) {
         <div class="section-header">
           <h2 class="section-title">System Status</h2>
@@ -282,9 +339,6 @@ import { forkJoin } from 'rxjs';
         </div>
       }
 
-      <!-- ═══════════════════════════════════════════════════ -->
-      <!-- SCHOOL ADMIN: Your Scope Section                    -->
-      <!-- ═══════════════════════════════════════════════════ -->
       @if (auth.isSchoolAdmin() && auth.orgScope().length > 0) {
         <div class="section-header">
           <h2 class="section-title">Your Scope</h2>
@@ -814,22 +868,37 @@ export class AdminDashboard implements OnInit {
   private readonly taxonomyService = inject(TaxonomyService);
   private readonly http = inject(HttpClient);
 
+  readonly isEditorDashboard = computed(() => !this.auth.isUniversityAdmin() && !this.auth.isSchoolAdmin());
+  readonly dashboardTitle = computed(() => {
+    if (this.auth.isUniversityAdmin()) return 'Command Center';
+    if (this.auth.isSchoolAdmin()) return 'School Dashboard';
+    return 'Editor Dashboard';
+  });
+  readonly dashboardSubtitle = computed(() => {
+    if (this.auth.isUniversityAdmin()) return 'Governance overview and system health at a glance';
+    if (this.auth.isSchoolAdmin()) return 'Your school overview and content management';
+    return 'Draft, revise, and submit content updates for review';
+  });
+
   // University Admin stats
   userCount = signal(0);
   orgCount = signal(0);
   categoryCount = signal(0);
   tagCount = signal(0);
 
-  // School Admin stats
+  // School Admin & Editor stats
   scopedOrgCount = computed(() => this.auth.orgScope().length);
   contentCount = signal(0);
   reviewCount = signal(0);
+  draftCount = signal(0);
 
   ngOnInit() {
     if (this.auth.isUniversityAdmin()) {
       this.loadUniversityAdminStats();
     } else if (this.auth.isSchoolAdmin()) {
       this.loadSchoolAdminStats();
+    } else {
+      this.loadEditorStats();
     }
   }
 
@@ -853,6 +922,14 @@ export class AdminDashboard implements OnInit {
   }
 
   private loadSchoolAdminStats() {
+    this.loadContributorStats();
+  }
+
+  private loadEditorStats() {
+    this.loadContributorStats();
+  }
+
+  private loadContributorStats() {
     const userId = this.auth.context()?.user?.id;
     if (!userId) return;
 
@@ -865,6 +942,12 @@ export class AdminDashboard implements OnInit {
     // Load review queue count
     this.http.get<{ data: { total: number } }>('/api/v1/admin/content?limit=1&offset=0&status=review').subscribe({
       next: (res) => this.reviewCount.set(res.data.total),
+      error: () => {}
+    });
+
+    // Load draft count
+    this.http.get<{ data: { total: number } }>(`/api/v1/admin/content?limit=1&offset=0&author_id=${userId}&status=draft`).subscribe({
+      next: (res) => this.draftCount.set(res.data.total),
       error: () => {}
     });
   }

@@ -159,7 +159,7 @@ export function requireStatusPermission(
 
     const body = request.body as { status?: string };
     const targetStatus = body?.status;
-    const requiredPermissionCode = (targetStatus === 'review' || targetStatus === 'draft') 
+    const requiredPermissionCode = targetStatus === 'review'
       ? writePermissionCode 
       : publishPermissionCode;
 

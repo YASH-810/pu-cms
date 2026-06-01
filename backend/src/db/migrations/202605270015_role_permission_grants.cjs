@@ -1,4 +1,4 @@
-const rolePermissionMap = {
+const grants = {
   UNIVERSITY_ADMIN: [
     'CREATE_PAGE', 'UPDATE_PAGE', 'DELETE_PAGE', 'PUBLISH_PAGE',
     'CREATE_BLOG', 'UPDATE_BLOG', 'DELETE_BLOG', 'PUBLISH_BLOG',
@@ -17,7 +17,7 @@ const rolePermissionMap = {
     'CREATE_ACHIEVEMENT', 'UPDATE_ACHIEVEMENT', 'DELETE_ACHIEVEMENT', 'APPROVE_ACHIEVEMENT',
     'CREATE_STORY', 'UPDATE_STORY', 'DELETE_STORY', 'APPROVE_STORY',
     'CREATE_CLUB', 'UPDATE_CLUB', 'DELETE_CLUB', 'APPROVE_CLUB',
-    'MANAGE_MEDIA', 'MANAGE_USERS', 'REVIEW_CONTENT', 'APPROVE_CONTENT', 'MANAGE_SEO'
+    'MANAGE_MEDIA', 'REVIEW_CONTENT', 'APPROVE_CONTENT', 'MANAGE_SEO'
   ],
   EDITOR: [
     'CREATE_PAGE', 'UPDATE_PAGE', 'DELETE_PAGE',
@@ -46,40 +46,29 @@ const rolePermissionMap = {
 };
 
 exports.up = async function up(knex) {
-  const roles = await knex('roles').select('id', 'name').whereIn('name', Object.keys(rolePermissionMap));
-  const permissions = await knex('permissions')
-    .select('id', 'code')
-    .whereIn('code', [...new Set(Object.values(rolePermissionMap).flat())]);
+  for (const [roleName, permissionCodes] of Object.entries(grants)) {
+    const role = await knex('roles').select('id').where({ name: roleName }).first();
+    if (!role) continue;
 
-  const roleByName = Object.fromEntries(roles.map((role) => [role.name, role.id]));
-  const permissionByCode = Object.fromEntries(permissions.map((permission) => [permission.code, permission.id]));
+    const permissions = await knex('permissions').select('id').whereIn('code', permissionCodes);
 
-  const grants = [];
-  for (const [roleName, permissionCodes] of Object.entries(rolePermissionMap)) {
-    for (const permissionCode of permissionCodes) {
-      if (roleByName[roleName] && permissionByCode[permissionCode]) {
-        grants.push({
-          role_id: roleByName[roleName],
-          permission_id: permissionByCode[permissionCode]
-        });
-      }
+    if (permissions.length > 0) {
+      await knex('role_permissions')
+        .insert(permissions.map((permission) => ({ role_id: role.id, permission_id: permission.id })))
+        .onConflict(['role_id', 'permission_id'])
+        .ignore();
     }
-  }
-
-  if (grants.length) {
-    await knex('role_permissions')
-      .insert(grants)
-      .onConflict(['role_id', 'permission_id'])
-      .ignore();
   }
 };
 
 exports.down = async function down(knex) {
-  const roleNames = Object.keys(rolePermissionMap);
-  const permissionCodes = [...new Set(Object.values(rolePermissionMap).flat())];
+  for (const [roleName, permissionCodes] of Object.entries(grants)) {
+    const role = await knex('roles').select('id').where({ name: roleName }).first();
+    if (!role) continue;
 
-  await knex('role_permissions')
-    .whereIn('role_id', knex('roles').select('id').whereIn('name', roleNames))
-    .whereIn('permission_id', knex('permissions').select('id').whereIn('code', permissionCodes))
-    .del();
+    await knex('role_permissions')
+      .where({ role_id: role.id })
+      .whereIn('permission_id', knex('permissions').select('id').whereIn('code', permissionCodes))
+      .del();
+  }
 };

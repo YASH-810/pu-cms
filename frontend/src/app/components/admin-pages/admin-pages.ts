@@ -9,21 +9,21 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unpublish';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unpublish: { status: 'draft',     label: 'Unpublish',         class: 'ghost-button'   }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unpublish: { status: 'draft', label: 'Unpublish', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    default: return [];
   }
 }
 
@@ -363,24 +363,24 @@ export class AdminPages implements OnInit {
   private readonly toast = inject(ToastService);
 
   // ─── State ────────────────────────────────────────────────────────────────
-  pages         = signal<Page[]>([]);
-  total         = signal(0);
-  loading       = signal(false);
-  saving        = signal(false);
+  pages = signal<Page[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm    = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
   currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics (counts from current full listing) ───────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Form modal ──────────────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -396,11 +396,11 @@ export class AdminPages implements OnInit {
   readonly templates = TEMPLATES;
 
   // ─── Status modal ─────────────────────────────────────────────────────────
-  showStatusModal  = signal(false);
-  statusTarget     = signal<Page | null>(null);
-  pendingAction    = signal<WorkflowAction>('submit');
-  pendingStatus    = signal('');
-  statusRemarks    = '';
+  showStatusModal = signal(false);
+  statusTarget = signal<Page | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
 
   readonly statusModalTitle = computed(() => {
     const a = this.pendingAction();
@@ -416,10 +416,10 @@ export class AdminPages implements OnInit {
   loadPages() {
     this.loading.set(true);
     this.pagesService.listPages({
-      status:  this.statusFilter || undefined,
-      search:  this.searchTerm   || undefined,
-      limit:   this.pageSize,
-      offset:  this.currentOffset()
+      status: this.statusFilter || undefined,
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.pages.set(res.pages);
@@ -470,14 +470,14 @@ export class AdminPages implements OnInit {
     this.isEditMode.set(true);
     this.editingId.set(page.id);
     this.form = {
-      title:          page.title,
-      slug:           page.slug,
-      summary:        page.summary ?? '',
-      body_html:      page.body_html ?? '',
-      template:       page.template,
+      title: page.title,
+      slug: page.slug,
+      summary: page.summary ?? '',
+      body_html: page.body_html ?? '',
+      template: page.template,
       hero_image_url: page.hero_image_url ?? '',
-      is_featured:    page.is_featured,
-      show_in_nav:    page.show_in_nav
+      is_featured: page.is_featured,
+      show_in_nav: page.show_in_nav
     };
     this.showFormModal.set(true);
   }
@@ -499,14 +499,14 @@ export class AdminPages implements OnInit {
     this.saving.set(true);
 
     const payload = {
-      title:          this.form.title.trim(),
-      slug:           this.form.slug.trim(),
-      summary:        this.form.summary.trim() || null,
-      body_html:      this.form.body_html || null,
-      template:       this.form.template,
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
+      summary: this.form.summary.trim() || null,
+      body_html: this.form.body_html || null,
+      template: this.form.template,
       hero_image_url: this.form.hero_image_url.trim() || null,
-      is_featured:    this.form.is_featured,
-      show_in_nav:    this.form.show_in_nav
+      is_featured: this.form.is_featured,
+      show_in_nav: this.form.show_in_nav
     };
 
     const request = this.isEditMode()
@@ -581,11 +581,11 @@ export class AdminPages implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 

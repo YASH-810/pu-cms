@@ -8,6 +8,7 @@ import { ToastService } from '../../services/toast.service';
 
 interface UnifiedContent {
   id: string;
+  module_id: string;
   title: string;
   slug: string;
   status: string;
@@ -89,7 +90,7 @@ interface UnifiedContent {
                         <button type="button" class="ghost-button" (click)="toggleRowDropdown(item.id)">...</button>
                         @if (activeRowDropdown() === item.id) {
                           <div class="dropdown-menu">
-                            <a [routerLink]="'/admin/' + (item.type_slug === 'blog' ? 'blogs' : item.type_slug + 's')" [queryParams]="{edit: item.id}">Edit Content</a>
+                            <a [routerLink]="moduleRoute(item.type_slug)" [queryParams]="{edit: item.module_id}">Edit Content</a>
                           </div>
                         }
                       </div>
@@ -197,7 +198,7 @@ export class AdminUnifiedContent implements OnInit {
 
     const roles = this.auth.context()?.globalRoles?.map(r => r.name) || [];
     const isSuperAdmin = roles.includes('SUPER_ADMIN') || roles.includes('UNIVERSITY_ADMIN');
-    
+
     // Editors only see their own content in the 'All' tab.
     // Published, Archived, and Review views show all content regardless of author.
     if (!isSuperAdmin && this.viewMode() === 'all') {
@@ -235,11 +236,25 @@ export class AdminUnifiedContent implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
+  }
+
+  moduleRoute(typeSlug: string): string {
+    const routes: Record<string, string> = {
+      page: '/admin/pages',
+      blog: '/admin/blogs',
+      event: '/admin/events',
+      announcement: '/admin/announcements',
+      achievement: '/admin/achievements',
+      story: '/admin/stories',
+      club: '/admin/clubs'
+    };
+
+    return routes[typeSlug] ?? '/admin/content';
   }
 }

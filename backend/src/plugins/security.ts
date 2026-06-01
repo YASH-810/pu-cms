@@ -22,6 +22,9 @@ export async function registerSecurity(app: FastifyInstance): Promise<void> {
   });
 
   // 2. CORS configuration with domain white-listing
+  const allowedOriginsEnv = app.config.ALLOWED_ORIGINS || '';
+  const allowedOriginsList = allowedOriginsEnv.split(',').map(o => o.trim()).filter(Boolean);
+
   await app.register(fastifyCors, {
     origin: (origin, cb) => {
       // Allow requests with no origin (e.g. mobile apps, backend-to-backend, local scripts)
@@ -29,9 +32,15 @@ export async function registerSecurity(app: FastifyInstance): Promise<void> {
         cb(null, true);
         return;
       }
+
+      // Check if it's in the allowed list from environment
+      if (allowedOriginsList.includes(origin)) {
+        cb(null, true);
+        return;
+      }
       
-      // Allow localhost dev ports and PU domains
-      const isAllowed = /localhost|127\.0\.0\.1|::1|\.pu\.edu$/.test(origin);
+      // Allow localhost dev ports, PU domains, and Vercel domains
+      const isAllowed = /localhost|127\.0\.0\.1|::1|\.pu\.edu$|\.vercel\.app$/.test(origin);
       if (isAllowed) {
         cb(null, true);
       } else {

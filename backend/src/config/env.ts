@@ -14,6 +14,7 @@ export interface AppConfig {
   GOOGLE_CALLBACK_URL: string;
   SUPER_ADMIN_EMAIL?: string;
   SESSION_SECRET: string;
+  ALLOWED_ORIGINS?: string;
 }
 
 declare module 'fastify' {
@@ -72,6 +73,10 @@ const schema = {
     SESSION_SECRET: {
       type: 'string',
       minLength: 16
+    },
+    ALLOWED_ORIGINS: {
+      type: 'string',
+      default: ''
     }
   }
 } as const;

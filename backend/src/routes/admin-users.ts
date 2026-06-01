@@ -624,6 +624,48 @@ export async function adminUsersRoutes(app: FastifyInstance): Promise<void> {
     }
   );
 
+  // Remove Organization Role Scope
+  app.delete<{ Params: { id: string; organizationId: string; roleId: string } }>(
+    '/api/v1/admin/users/:id/organizations/:organizationId/roles/:roleId',
+    { preHandler: [checkUserReadPermission] },
+    async (request) => {
+      let payload;
+      try {
+        payload = await request.jwtVerify<{ sub: string }>();
+      } catch {
+        throw unauthenticated('Valid authentication token is required');
+      }
+      const requestUserId = payload.sub;
+      const { id, organizationId, roleId } = request.params;
+
+      await verifyTargetUserInScope(app.db, requestUserId, id);
+      await verifyHierarchyEditPermission(app.db, requestUserId, id);
+
+      const requestUserLevel = await getUserHierarchyLevel(app.db, requestUserId);
+      if (requestUserLevel > 2) {
+        const allScopedOrgIds = await getScopedOrgIds(app.db, requestUserId);
+        if (!allScopedOrgIds.includes(organizationId)) {
+          throw forbidden('Target organization is outside your administrative scope');
+        }
+      }
+
+      const role = await app.db('roles').where({ id: roleId }).whereNull('deleted_at').first();
+      if (!role || role.hierarchy_level < requestUserLevel) {
+        throw forbidden('You cannot remove roles higher than your own hierarchy level');
+      }
+
+      await app.db('user_organization_roles')
+        .where({
+          user_id: id,
+          organization_id: organizationId,
+          role_id: roleId
+        })
+        .del();
+
+      return { success: true };
+    }
+  );
+
   // Soft Delete User
   app.delete<{ Params: { id: string } }>('/api/v1/admin/users/:id', { preHandler: [checkUserReadPermission] }, async (request) => {
     let payload;

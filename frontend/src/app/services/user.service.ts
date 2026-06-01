@@ -87,6 +87,12 @@ export class UserService {
     );
   }
 
+  removeOrgRole(userId: string, orgId: string, roleId: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/${userId}/organizations/${orgId}/roles/${roleId}`).pipe(
+      map(res => res.success)
+    );
+  }
+
   deleteUser(id: string): Observable<boolean> {
     return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/${id}`).pipe(
       map(res => res.success)

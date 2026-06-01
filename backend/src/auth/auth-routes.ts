@@ -123,7 +123,7 @@ export async function authRoutes(app: FastifyInstance, options: AuthRoutesOption
   });
 
   app.post<{ Body: { email?: string } }>('/api/v1/admin/auth/dev-token', async (request) => {
-    if (app.config.NODE_ENV === 'production') {
+    if (app.config.NODE_ENV === 'production' && process.env.ENABLE_DEV_LOGIN !== 'true') {
       throw unauthenticated('Development token login is not available in production');
     }
 

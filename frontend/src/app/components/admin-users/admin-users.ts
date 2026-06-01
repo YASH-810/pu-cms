@@ -182,12 +182,12 @@ import { AuthService } from '../../services/auth.service';
                     <p class="muted">No scoped authority assigned.</p>
                   } @else {
                     @for (scope of detail.organization_roles; track scope.organization_id + scope.role_id) {
-                      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;">
-                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                          <strong style="color: #334155; font-size: 0.9rem;">{{ scope.organization_name }}</strong>
-                          <span class="pill" style="font-size: 0.75rem; padding: 4px 8px;">{{ scope.role_name.replace('_', ' ') | titlecase }}</span>
+                      <div class="scope-row" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                          <strong>{{ scope.organization_name }}</strong>
+                          <span style="margin-left: 8px;" class="pill">{{ scope.role_name.replace('_', ' ') | titlecase }}</span>
                         </div>
-                        <button type="button" class="ghost-button" style="color: #e11d48; border-color: transparent; padding: 6px 10px; font-size: 0.82rem; background: transparent;" (click)="removeOrganizationRole(scope.organization_id, scope.role_id)" onmouseover="this.style.background='#ffe4e6'; this.style.borderColor='#fecdd3'" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">Remove</button>
+                        <button type="button" class="ghost-button" style="color:var(--color-danger); padding: 4px 8px; font-size: 0.8rem;" (click)="removeOrganizationRole(scope.organization_id, scope.role_id)">Remove</button>
                       </div>
                     }
                   }

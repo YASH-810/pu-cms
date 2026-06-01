@@ -11,22 +11,22 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unarchive: { status: 'draft',     label: 'Unarchive',         class: 'primary-button' }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unarchive: { status: 'draft', label: 'Unarchive', class: 'primary-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    case 'archived':  return ['unarchive'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    case 'archived': return ['unarchive'];
+    default: return [];
   }
 }
 
@@ -460,31 +460,31 @@ export class AdminAnnouncements implements OnInit {
   });
 
   // ─── State ────────────────────────────────────────────────────────────────
-  announcements    = signal<Announcement[]>([]);
-  total            = signal(0);
-  loading          = signal(false);
-  saving           = signal(false);
+  announcements = signal<Announcement[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm       = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
-  typeFilter       = '';
-  priorityFilter   = '';
-  currentOffset    = signal(0);
+  typeFilter = '';
+  priorityFilter = '';
+  currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics ─────────────────────────────────────────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Metadata lists ──────────────────────────────────────────────────────
   announcementTypes = signal<AnnouncementType[]>([]);
-  activeOrgs        = signal<Organization[]>([]);
+  activeOrgs = signal<Organization[]>([]);
   readonly priorities = PRIORITIES;
 
   // ─── Form modal state ───────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -509,10 +509,10 @@ export class AdminAnnouncements implements OnInit {
 
   // ─── Status modal state ─────────────────────────────────────────────────
   showStatusModal = signal(false);
-  statusTarget    = signal<Announcement | null>(null);
-  pendingAction   = signal<WorkflowAction>('submit');
-  pendingStatus   = signal('');
-  statusRemarks   = '';
+  statusTarget = signal<Announcement | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
   activeRowDropdown = signal<string | null>(null);
 
   toggleRowDropdown(id: string) {
@@ -549,12 +549,12 @@ export class AdminAnnouncements implements OnInit {
   loadAnnouncements() {
     this.loading.set(true);
     this.announcementsService.listAnnouncements({
-      status:               this.statusFilter || undefined,
+      status: this.statusFilter || undefined,
       announcement_type_id: this.typeFilter || undefined,
-      priority:             this.priorityFilter || undefined,
-      search:               this.searchTerm || undefined,
-      limit:                this.pageSize,
-      offset:               this.currentOffset()
+      priority: this.priorityFilter || undefined,
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.announcements.set(res.announcements);
@@ -625,22 +625,22 @@ export class AdminAnnouncements implements OnInit {
     };
 
     this.form = {
-      title:                ann.title,
-      slug:                 ann.slug,
+      title: ann.title,
+      slug: ann.slug,
       announcement_type_id: ann.announcement_type_id,
-      summary:              ann.summary ?? '',
-      body_html:            ann.body_html ?? '',
-      pdf_url:              ann.pdf_url ?? '',
-      priority:             ann.priority,
-      organization_id:      null,
-      valid_from:           formatInputDate(ann.valid_from),
-      valid_until:          formatInputDate(ann.valid_until)
+      summary: ann.summary ?? '',
+      body_html: ann.body_html ?? '',
+      pdf_url: ann.pdf_url ?? '',
+      priority: ann.priority,
+      organization_id: null,
+      valid_from: formatInputDate(ann.valid_from),
+      valid_until: formatInputDate(ann.valid_until)
     };
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { 
-    this.showFormModal.set(false); 
+  closeFormModal() {
+    this.showFormModal.set(false);
     const params = this.route.snapshot.queryParams;
     if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
@@ -695,15 +695,15 @@ export class AdminAnnouncements implements OnInit {
     this.saving.set(true);
 
     const payload: Record<string, any> = {
-      title:                this.form.title.trim(),
-      slug:                 this.form.slug.trim(),
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
       announcement_type_id: this.form.announcement_type_id,
-      priority:             this.form.priority,
-      valid_from:           new Date(this.form.valid_from).toISOString(),
-      valid_until:          this.form.valid_until ? new Date(this.form.valid_until).toISOString() : null,
-      summary:              slug === 'title_plus_description' ? this.form.summary.trim() : null,
-      body_html:            slug === 'full_content' ? this.form.body_html.trim() : null,
-      pdf_url:              slug === 'title_plus_pdf' ? this.form.pdf_url.trim() : null
+      priority: this.form.priority,
+      valid_from: new Date(this.form.valid_from).toISOString(),
+      valid_until: this.form.valid_until ? new Date(this.form.valid_until).toISOString() : null,
+      summary: slug === 'title_plus_description' ? this.form.summary.trim() : null,
+      body_html: slug === 'full_content' ? this.form.body_html.trim() : null,
+      pdf_url: slug === 'title_plus_pdf' ? this.form.pdf_url.trim() : null
     };
 
     if (this.isEditMode()) {
@@ -802,21 +802,21 @@ export class AdminAnnouncements implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 
   priorityClass(p: string): string {
     switch (p) {
       case 'critical': return 'pill pill-priority-critical';
-      case 'high':     return 'pill pill-priority-high';
-      case 'medium':   return 'pill pill-priority-medium';
-      case 'low':      return 'pill pill-priority-low';
-      default:          return 'pill';
+      case 'high': return 'pill pill-priority-high';
+      case 'medium': return 'pill pill-priority-medium';
+      case 'low': return 'pill pill-priority-low';
+      default: return 'pill';
     }
   }
 

@@ -11,22 +11,22 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unarchive: { status: 'draft',     label: 'Unarchive',         class: 'ghost-button'   }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unarchive: { status: 'draft', label: 'Unarchive', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    case 'archived':  return ['unarchive'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    case 'archived': return ['unarchive'];
+    default: return [];
   }
 }
 
@@ -449,21 +449,21 @@ export class AdminStories implements OnInit {
   });
 
   // ─── State ────────────────────────────────────────────────────────────────
-  stories       = signal<Story[]>([]);
-  total         = signal(0);
-  loading       = signal(false);
-  saving        = signal(false);
+  stories = signal<Story[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm    = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
-  roleFilter    = '';
-  typeFilter    = '';
+  roleFilter = '';
+  typeFilter = '';
   currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics ─────────────────────────────────────────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Metadata options ────────────────────────────────────────────────────
   activeOrgs = signal<Organization[]>([]);
@@ -472,8 +472,8 @@ export class AdminStories implements OnInit {
 
   // ─── Form modal state ───────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -490,10 +490,10 @@ export class AdminStories implements OnInit {
 
   // ─── Status modal state ─────────────────────────────────────────────────
   showStatusModal = signal(false);
-  statusTarget    = signal<Story | null>(null);
-  pendingAction   = signal<WorkflowAction>('submit');
-  pendingStatus   = signal('');
-  statusRemarks   = '';
+  statusTarget = signal<Story | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
   activeRowDropdown = signal<string | null>(null);
 
   toggleRowDropdown(id: string) {
@@ -530,12 +530,12 @@ export class AdminStories implements OnInit {
   loadStories() {
     this.loading.set(true);
     this.storiesService.listStories({
-      status:      this.statusFilter || undefined,
-      story_type:  this.typeFilter || undefined,
+      status: this.statusFilter || undefined,
+      story_type: this.typeFilter || undefined,
       person_role: this.roleFilter || undefined,
-      search:      this.searchTerm || undefined,
-      limit:       this.pageSize,
-      offset:      this.currentOffset()
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.stories.set(res.stories);
@@ -592,22 +592,22 @@ export class AdminStories implements OnInit {
     this.editingId.set(st.id);
 
     this.form = {
-      title:            st.title,
-      slug:             st.slug,
-      story_type:       st.story_type,
-      person_name:      st.person_name,
-      person_role:      st.person_role,
-      company:          st.company ?? '',
-      graduation_year:  st.graduation_year,
-      linkedin_url:     st.linkedin_url ?? '',
-      is_featured:      st.is_featured,
-      organization_id:  null
+      title: st.title,
+      slug: st.slug,
+      story_type: st.story_type,
+      person_name: st.person_name,
+      person_role: st.person_role,
+      company: st.company ?? '',
+      graduation_year: st.graduation_year,
+      linkedin_url: st.linkedin_url ?? '',
+      is_featured: st.is_featured,
+      organization_id: null
     };
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { 
-    this.showFormModal.set(false); 
+  closeFormModal() {
+    this.showFormModal.set(false);
     const params = this.route.snapshot.queryParams;
     if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
@@ -633,15 +633,15 @@ export class AdminStories implements OnInit {
     this.saving.set(true);
 
     const payload = {
-      title:            this.form.title.trim(),
-      slug:             this.form.slug.trim(),
-      story_type:       this.form.story_type,
-      person_name:      this.form.person_name.trim(),
-      person_role:      this.form.person_role,
-      company:          this.form.company.trim() || null,
-      graduation_year:  this.form.graduation_year,
-      linkedin_url:     this.form.linkedin_url.trim() || null,
-      is_featured:      this.form.is_featured
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
+      story_type: this.form.story_type,
+      person_name: this.form.person_name.trim(),
+      person_role: this.form.person_role,
+      company: this.form.company.trim() || null,
+      graduation_year: this.form.graduation_year,
+      linkedin_url: this.form.linkedin_url.trim() || null,
+      is_featured: this.form.is_featured
     };
 
     if (this.isEditMode()) {
@@ -737,11 +737,11 @@ export class AdminStories implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 

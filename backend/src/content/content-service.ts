@@ -55,7 +55,7 @@ const allowedTransitions: Record<ContentStatus, ContentStatus[]> = {
 };
 
 export class ContentService {
-  public constructor(private readonly db: Knex) {}
+  public constructor(private readonly db: Knex) { }
 
   public async createEntity(input: CreateEntityInput, context: RequestAuditContext): Promise<Record<string, unknown>> {
     if (!input.title?.trim() || !input.slug?.trim()) {
@@ -322,7 +322,7 @@ export class ContentService {
     if (filters.search) {
       query.where((q) => {
         q.whereILike('ce.title', `%${filters.search}%`)
-         .orWhereILike('ce.slug', `%${filters.search}%`);
+          .orWhereILike('ce.slug', `%${filters.search}%`);
       });
     }
 

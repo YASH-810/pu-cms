@@ -11,22 +11,22 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unarchive: { status: 'draft',     label: 'Unarchive',         class: 'ghost-button'   }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unarchive: { status: 'draft', label: 'Unarchive', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    case 'archived':  return ['unarchive'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    case 'archived': return ['unarchive'];
+    default: return [];
   }
 }
 
@@ -398,28 +398,28 @@ export class AdminClubs implements OnInit {
   });
 
   // ─── State ────────────────────────────────────────────────────────────────
-  clubs         = signal<Club[]>([]);
-  total         = signal(0);
-  loading       = signal(false);
-  saving        = signal(false);
+  clubs = signal<Club[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm    = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
-  orgFilter     = '';
+  orgFilter = '';
   currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics ─────────────────────────────────────────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Metadata options ────────────────────────────────────────────────────
   activeOrgs = signal<Organization[]>([]);
 
   // ─── Form modal state ───────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -436,10 +436,10 @@ export class AdminClubs implements OnInit {
 
   // ─── Status modal state ─────────────────────────────────────────────────
   showStatusModal = signal(false);
-  statusTarget    = signal<Club | null>(null);
-  pendingAction   = signal<WorkflowAction>('submit');
-  pendingStatus   = signal('');
-  statusRemarks   = '';
+  statusTarget = signal<Club | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
   activeRowDropdown = signal<string | null>(null);
 
   toggleRowDropdown(id: string) {
@@ -476,11 +476,11 @@ export class AdminClubs implements OnInit {
   loadClubs() {
     this.loading.set(true);
     this.clubsService.listClubs({
-      status:          this.statusFilter || undefined,
+      status: this.statusFilter || undefined,
       organization_id: this.orgFilter || undefined,
-      search:          this.searchTerm || undefined,
-      limit:           this.pageSize,
-      offset:          this.currentOffset()
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.clubs.set(res.clubs);
@@ -537,22 +537,22 @@ export class AdminClubs implements OnInit {
     this.editingId.set(cl.id);
 
     this.form = {
-      title:            cl.title,
-      slug:             cl.slug,
-      organization_id:  cl.organization_id,
+      title: cl.title,
+      slug: cl.slug,
+      organization_id: cl.organization_id,
       meeting_schedule: cl.meeting_schedule ?? '',
-      joining_process:  cl.joining_process ?? '',
-      president:        cl.leadership ? (cl.leadership['president'] as string || '') : '',
-      secretary:        cl.leadership ? (cl.leadership['secretary'] as string || '') : '',
-      advisor:          cl.leadership ? (cl.leadership['advisor'] as string || '') : '',
-      insta_url:        cl.social_links ? (cl.social_links['instagram'] as string || '') : '',
-      facebook_url:     cl.social_links ? (cl.social_links['facebook'] as string || '') : ''
+      joining_process: cl.joining_process ?? '',
+      president: cl.leadership ? (cl.leadership['president'] as string || '') : '',
+      secretary: cl.leadership ? (cl.leadership['secretary'] as string || '') : '',
+      advisor: cl.leadership ? (cl.leadership['advisor'] as string || '') : '',
+      insta_url: cl.social_links ? (cl.social_links['instagram'] as string || '') : '',
+      facebook_url: cl.social_links ? (cl.social_links['facebook'] as string || '') : ''
     };
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { 
-    this.showFormModal.set(false); 
+  closeFormModal() {
+    this.showFormModal.set(false);
     const params = this.route.snapshot.queryParams;
     if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
@@ -587,13 +587,13 @@ export class AdminClubs implements OnInit {
     if (this.form.facebook_url.trim()) socialLinks['facebook'] = this.form.facebook_url.trim();
 
     const payload = {
-      title:            this.form.title.trim(),
-      slug:             this.form.slug.trim(),
-      organization_id:  this.form.organization_id,
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
+      organization_id: this.form.organization_id,
       meeting_schedule: this.form.meeting_schedule.trim() || null,
-      joining_process:  this.form.joining_process.trim() || null,
-      leadership:       Object.keys(leadership).length > 0 ? leadership : null,
-      social_links:     Object.keys(socialLinks).length > 0 ? socialLinks : null
+      joining_process: this.form.joining_process.trim() || null,
+      leadership: Object.keys(leadership).length > 0 ? leadership : null,
+      social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null
     };
 
     if (this.isEditMode()) {
@@ -684,11 +684,11 @@ export class AdminClubs implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 

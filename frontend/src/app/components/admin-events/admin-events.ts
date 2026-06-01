@@ -12,23 +12,23 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unpublish' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unpublish: { status: 'draft',     label: 'Unpublish',         class: 'ghost-button'   },
-  unarchive: { status: 'draft',     label: 'Unarchive',         class: 'ghost-button'   }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unpublish: { status: 'draft', label: 'Unpublish', class: 'ghost-button' },
+  unarchive: { status: 'draft', label: 'Unarchive', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    case 'archived':  return ['unarchive'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    case 'archived': return ['unarchive'];
+    default: return [];
   }
 }
 
@@ -446,31 +446,31 @@ export class AdminEvents implements OnInit {
   });
 
   // ─── State ────────────────────────────────────────────────────────────────
-  events        = signal<Event[]>([]);
-  total         = signal(0);
-  loading       = signal(false);
-  saving        = signal(false);
+  events = signal<Event[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm    = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
-  typeFilter    = '';
-  modeFilter    = '';
+  typeFilter = '';
+  modeFilter = '';
   currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics ─────────────────────────────────────────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Lists for selection ─────────────────────────────────────────────────
-  activeOrgs  = signal<Organization[]>([]);
+  activeOrgs = signal<Organization[]>([]);
   readonly eventTypes = EVENT_TYPES;
   readonly timezones = TIMEZONES;
 
   // ─── Form modal ──────────────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -492,11 +492,11 @@ export class AdminEvents implements OnInit {
   } = this.emptyForm();
 
   // ─── Status modal ─────────────────────────────────────────────────────────
-  showStatusModal  = signal(false);
-  statusTarget     = signal<Event | null>(null);
-  pendingAction    = signal<WorkflowAction>('submit');
-  pendingStatus    = signal('');
-  statusRemarks    = '';
+  showStatusModal = signal(false);
+  statusTarget = signal<Event | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
   activeRowDropdown = signal<string | null>(null);
 
   toggleRowDropdown(id: string) {
@@ -533,12 +533,12 @@ export class AdminEvents implements OnInit {
   loadEvents() {
     this.loading.set(true);
     this.eventsService.listEvents({
-      status:     this.statusFilter || undefined,
-      event_type: this.typeFilter   || undefined,
-      event_mode: this.modeFilter   || undefined,
-      search:     this.searchTerm   || undefined,
-      limit:      this.pageSize,
-      offset:     this.currentOffset()
+      status: this.statusFilter || undefined,
+      event_type: this.typeFilter || undefined,
+      event_mode: this.modeFilter || undefined,
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.events.set(res.events);
@@ -603,28 +603,28 @@ export class AdminEvents implements OnInit {
     };
 
     this.form = {
-      title:                    ev.title,
-      slug:                     ev.slug,
-      event_type:               ev.event_type,
-      event_mode:               ev.event_mode,
-      venue:                    ev.venue ?? '',
-      organizer:                ev.organizer ?? '',
-      organization_id:          null,
-      start_at:                 formatInputDate(ev.start_at),
-      end_at:                   formatInputDate(ev.end_at),
-      timezone:                 ev.timezone,
+      title: ev.title,
+      slug: ev.slug,
+      event_type: ev.event_type,
+      event_mode: ev.event_mode,
+      venue: ev.venue ?? '',
+      organizer: ev.organizer ?? '',
+      organization_id: null,
+      start_at: formatInputDate(ev.start_at),
+      end_at: formatInputDate(ev.end_at),
+      timezone: ev.timezone,
       registration_deadline_at: formatInputDate(ev.registration_deadline_at),
-      max_participants:         ev.max_participants,
-      registration_link:        ev.registration_link ?? '',
-      contact_email:            ev.contact_email ?? '',
-      contact_phone:            ev.contact_phone ?? '',
-      is_featured:              ev.is_featured
+      max_participants: ev.max_participants,
+      registration_link: ev.registration_link ?? '',
+      contact_email: ev.contact_email ?? '',
+      contact_phone: ev.contact_phone ?? '',
+      is_featured: ev.is_featured
     };
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { 
-    this.showFormModal.set(false); 
+  closeFormModal() {
+    this.showFormModal.set(false);
     const params = this.route.snapshot.queryParams;
     if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
@@ -673,21 +673,21 @@ export class AdminEvents implements OnInit {
     this.saving.set(true);
 
     const payload = {
-      title:                    this.form.title.trim(),
-      slug:                     this.form.slug.trim(),
-      event_type:               this.form.event_type,
-      event_mode:               this.form.event_mode,
-      venue:                    this.form.event_mode !== 'online' ? this.form.venue.trim() : null,
-      organizer:                this.form.organizer.trim() || null,
-      start_at:                 new Date(this.form.start_at).toISOString(),
-      end_at:                   new Date(this.form.end_at).toISOString(),
-      timezone:                 this.form.timezone,
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
+      event_type: this.form.event_type,
+      event_mode: this.form.event_mode,
+      venue: this.form.event_mode !== 'online' ? this.form.venue.trim() : null,
+      organizer: this.form.organizer.trim() || null,
+      start_at: new Date(this.form.start_at).toISOString(),
+      end_at: new Date(this.form.end_at).toISOString(),
+      timezone: this.form.timezone,
       registration_deadline_at: this.form.registration_deadline_at ? new Date(this.form.registration_deadline_at).toISOString() : null,
-      max_participants:         this.form.max_participants,
-      registration_link:        this.form.registration_link.trim() || null,
-      contact_email:            this.form.contact_email.trim() || null,
-      contact_phone:            this.form.contact_phone.trim() || null,
-      is_featured:              this.form.is_featured
+      max_participants: this.form.max_participants,
+      registration_link: this.form.registration_link.trim() || null,
+      contact_email: this.form.contact_email.trim() || null,
+      contact_phone: this.form.contact_phone.trim() || null,
+      is_featured: this.form.is_featured
     };
 
     if (this.isEditMode()) {
@@ -783,11 +783,11 @@ export class AdminEvents implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 

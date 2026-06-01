@@ -56,7 +56,7 @@ interface ListPagesQuery {
 }
 
 export async function adminPagesRoutes(app: FastifyInstance): Promise<void> {
-  const readGuard  = requirePermission('UPDATE_PAGE');
+  const readGuard = requirePermission('UPDATE_PAGE');
   const writeGuard = requirePermission('UPDATE_PAGE');
   const createGuard = requirePermission('CREATE_PAGE');
   const deleteGuard = requirePermission('DELETE_PAGE');

@@ -11,22 +11,22 @@ type StatusFilter = '' | 'draft' | 'review' | 'published' | 'archived' | 'reject
 type WorkflowAction = 'submit' | 'approve' | 'reject' | 'publish' | 'archive' | 'unarchive';
 
 const WORKFLOW_TRANSITIONS: Record<WorkflowAction, { status: string; label: string; class: string }> = {
-  submit:    { status: 'review',    label: 'Submit for Review', class: 'primary-button' },
-  approve:   { status: 'published', label: 'Approve & Publish', class: 'success-button' },
-  reject:    { status: 'rejected',  label: 'Reject',            class: 'danger-button'  },
-  publish:   { status: 'published', label: 'Publish',           class: 'success-button' },
-  archive:   { status: 'archived',  label: 'Archive',           class: 'warning-button' },
-  unarchive: { status: 'draft',     label: 'Unarchive',         class: 'ghost-button'   }
+  submit: { status: 'review', label: 'Submit for Review', class: 'primary-button' },
+  approve: { status: 'published', label: 'Approve & Publish', class: 'success-button' },
+  reject: { status: 'rejected', label: 'Reject', class: 'danger-button' },
+  publish: { status: 'published', label: 'Publish', class: 'success-button' },
+  archive: { status: 'archived', label: 'Archive', class: 'warning-button' },
+  unarchive: { status: 'draft', label: 'Unarchive', class: 'ghost-button' }
 };
 
 function availableActions(status: string): WorkflowAction[] {
   switch (status) {
-    case 'draft':     return ['submit'];
-    case 'review':    return ['approve', 'reject'];
+    case 'draft': return ['submit'];
+    case 'review': return ['approve', 'reject'];
     case 'published': return ['archive'];
-    case 'rejected':  return ['submit'];
-    case 'archived':  return ['unarchive'];
-    default:          return [];
+    case 'rejected': return ['submit'];
+    case 'archived': return ['unarchive'];
+    default: return [];
   }
 }
 
@@ -418,21 +418,21 @@ export class AdminAchievements implements OnInit {
   });
 
   // ─── State ────────────────────────────────────────────────────────────────
-  achievements  = signal<Achievement[]>([]);
-  total         = signal(0);
-  loading       = signal(false);
-  saving        = signal(false);
+  achievements = signal<Achievement[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  saving = signal(false);
 
-  searchTerm    = '';
+  searchTerm = '';
   statusFilter: StatusFilter = '';
-  levelFilter   = '';
-  typeFilter    = '';
+  levelFilter = '';
+  typeFilter = '';
   currentOffset = signal(0);
   readonly pageSize = 20;
 
   // ─── Metrics ─────────────────────────────────────────────────────────────
   publishedCount = signal(0);
-  reviewCount    = signal(0);
+  reviewCount = signal(0);
 
   // ─── Metadata options ────────────────────────────────────────────────────
   activeOrgs = signal<Organization[]>([]);
@@ -441,8 +441,8 @@ export class AdminAchievements implements OnInit {
 
   // ─── Form modal state ───────────────────────────────────────────────────
   showFormModal = signal(false);
-  isEditMode    = signal(false);
-  editingId     = signal<string | null>(null);
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
 
   form: {
     title: string;
@@ -458,10 +458,10 @@ export class AdminAchievements implements OnInit {
 
   // ─── Status modal state ─────────────────────────────────────────────────
   showStatusModal = signal(false);
-  statusTarget    = signal<Achievement | null>(null);
-  pendingAction   = signal<WorkflowAction>('submit');
-  pendingStatus   = signal('');
-  statusRemarks   = '';
+  statusTarget = signal<Achievement | null>(null);
+  pendingAction = signal<WorkflowAction>('submit');
+  pendingStatus = signal('');
+  statusRemarks = '';
   activeRowDropdown = signal<string | null>(null);
 
   toggleRowDropdown(id: string) {
@@ -498,12 +498,12 @@ export class AdminAchievements implements OnInit {
   loadAchievements() {
     this.loading.set(true);
     this.achievementsService.listAchievements({
-      status:           this.statusFilter || undefined,
+      status: this.statusFilter || undefined,
       achievement_type: this.typeFilter || undefined,
-      level:            this.levelFilter || undefined,
-      search:           this.searchTerm || undefined,
-      limit:            this.pageSize,
-      offset:           this.currentOffset()
+      level: this.levelFilter || undefined,
+      search: this.searchTerm || undefined,
+      limit: this.pageSize,
+      offset: this.currentOffset()
     }).subscribe({
       next: (res) => {
         this.achievements.set(res.achievements);
@@ -562,21 +562,21 @@ export class AdminAchievements implements OnInit {
     this.editingId.set(ac.id);
 
     this.form = {
-      title:            ac.title,
-      slug:             ac.slug,
+      title: ac.title,
+      slug: ac.slug,
       achievement_type: ac.achievement_type,
-      level:            ac.level,
-      awarded_at:       ac.awarded_at ? ac.awarded_at.split('T')[0] : '',
-      awarded_by:       ac.awarded_by,
-      prize_amount:     ac.prize_amount,
-      is_featured:      ac.is_featured,
-      organization_id:  null
+      level: ac.level,
+      awarded_at: ac.awarded_at ? ac.awarded_at.split('T')[0] : '',
+      awarded_by: ac.awarded_by,
+      prize_amount: ac.prize_amount,
+      is_featured: ac.is_featured,
+      organization_id: null
     };
     this.showFormModal.set(true);
   }
 
-  closeFormModal() { 
-    this.showFormModal.set(false); 
+  closeFormModal() {
+    this.showFormModal.set(false);
     const params = this.route.snapshot.queryParams;
     if (params['create'] || params['edit']) {
       this.router.navigate(['/admin/content']);
@@ -602,14 +602,14 @@ export class AdminAchievements implements OnInit {
     this.saving.set(true);
 
     const payload = {
-      title:            this.form.title.trim(),
-      slug:             this.form.slug.trim(),
+      title: this.form.title.trim(),
+      slug: this.form.slug.trim(),
       achievement_type: this.form.achievement_type,
-      level:            this.form.level,
-      awarded_at:       new Date(this.form.awarded_at).toISOString(),
-      awarded_by:       this.form.awarded_by.trim(),
-      prize_amount:     this.form.prize_amount,
-      is_featured:      this.form.is_featured
+      level: this.form.level,
+      awarded_at: new Date(this.form.awarded_at).toISOString(),
+      awarded_by: this.form.awarded_by.trim(),
+      prize_amount: this.form.prize_amount,
+      is_featured: this.form.is_featured
     };
 
     if (this.isEditMode()) {
@@ -705,11 +705,11 @@ export class AdminAchievements implements OnInit {
   statusClass(status: string): string {
     switch (status) {
       case 'published': return 'pill pill-active';
-      case 'draft':     return 'pill pill-draft';
-      case 'review':    return 'pill pill-review';
-      case 'rejected':  return 'pill pill-rejected';
-      case 'archived':  return 'pill';
-      default:          return 'pill';
+      case 'draft': return 'pill pill-draft';
+      case 'review': return 'pill pill-review';
+      case 'rejected': return 'pill pill-rejected';
+      case 'archived': return 'pill';
+      default: return 'pill';
     }
   }
 

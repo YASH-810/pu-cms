@@ -106,7 +106,6 @@ label,
 }
 
 input,
-select,
 textarea {
   border: 1px solid var(--border-color);
   border-radius: 0;
@@ -115,6 +114,23 @@ textarea {
   padding: 11px 12px;
   outline: none;
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+select {
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 11px 36px 11px 12px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  /* Remove browser-native appearance (fixes black bar on Windows/Chrome) */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 
 input:focus,
@@ -358,6 +374,11 @@ tbody tr:hover {
   gap: 16px;
 }
 
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+}
+
 .modal-card footer {
   justify-content: flex-end;
   margin-top: 20px;
@@ -413,6 +434,50 @@ tbody tr:hover {
   gap: 18px;
 }
 
+.two-column.details > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.two-column.details > div span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.two-column.details > div strong,
+.two-column.details > div p {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.span-two {
+  grid-column: span 2;
+}
+
+.profile-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+}
+
+.profile-actions {
+  justify-content: flex-start;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 4px;
+}
+
 .scope-list {
   min-height: 142px;
   display: flex;
@@ -444,11 +509,22 @@ tbody tr:hover {
 }
 
 .tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
   border: 1px solid var(--border-color);
   border-radius: 12px;
   background: var(--bg-card);
-  padding: 12px;
+  padding: 12px 16px;
   cursor: pointer;
+  gap: 4px;
+  transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.tree-node:hover {
+  background-color: #f1f5f9;
 }
 
 .tree-node.active {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Organization, OrgTreeNode, OrganizationService } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
@@ -56,7 +56,7 @@ import { AuthService } from '../../services/auth.service';
           @if (selectedOrg(); as org) {
             <div class="profile-panel">
               <div class="identity-cell">
-                <div class="avatar">{{ org.short_name || org.name.slice(0, 2).toUpperCase() }}</div>
+                <div class="avatar">{{ (org.short_name || org.name).slice(0, 2).toUpperCase() }}</div>
                 <div>
                   <strong>{{ org.name }}</strong>
                   <span>{{ org.slug }}</span>
@@ -120,9 +120,13 @@ import { AuthService } from '../../services/auth.service';
               <select [(ngModel)]="formOrg.parent_id" name="parentId">
                 @if (!auth.isSchoolAdmin()) {
                   <option [ngValue]="null">None</option>
+                } @else if (filteredParentOrgs().length === 0) {
+                  <option [ngValue]="null" disabled>No valid parent organizations in your scope</option>
                 }
-                @for (parent of filteredParentOrgs(); track parent.id) {
-                  <option [value]="parent.id">{{ parent.name }} ({{ parent.org_type }})</option>
+                @for (parent of getDropdownOrgs(); track parent.id) {
+                  <option [ngValue]="parent.id" [disabled]="!isParentOptionEnabled(parent)">
+                    {{ parent.displayName || parent.name }} ({{ parent.org_type }})
+                  </option>
                 }
               </select>
             </label>
@@ -163,6 +167,15 @@ export class AdminOrganizations implements OnInit {
   isEditMode = signal(false);
   formOrg: Partial<Organization> = this.emptyOrg();
 
+  constructor() {
+    effect(() => {
+      if (this.auth.context()) {
+        this.loadTree();
+        this.loadFlatOrgs();
+      }
+    });
+  }
+
   readonly orgTypes = [
     { value: 'university', label: 'University' },
     { value: 'school', label: 'School' },
@@ -176,8 +189,6 @@ export class AdminOrganizations implements OnInit {
   ];
 
   ngOnInit() {
-    this.loadTree();
-    this.loadFlatOrgs();
   }
 
   loadTree() {
@@ -270,20 +281,58 @@ export class AdminOrganizations implements OnInit {
     }
   }
 
-  filteredParentOrgs(): Organization[] {
-    const type = this.formOrg.org_type;
-    const allowed = this.getAllowedParentTypes(type);
-    
-    return this.flatOrganizations().filter(org => {
-      // Prevent self-referencing
-      if (this.isEditMode() && org.id === this.formOrg.id) return false;
-      // If there are allowed parents for this type, enforce them
-      if (allowed.length > 0 && !allowed.includes(org.org_type)) return false;
-      // Universities generally don't have parents
-      if (type === 'university') return false;
-      
-      return true;
+  private getDescendantIds(id: string): string[] {
+    const ids: string[] = [];
+    const visit = (node: OrgTreeNode, collect: boolean) => {
+      const match = node.id === id || collect;
+      if (match && node.id !== id) {
+        ids.push(node.id);
+      }
+      node.children?.forEach(child => visit(child, match));
+    };
+    this.treeNodes().forEach(node => visit(node, false));
+    return ids;
+  }
+
+  getDropdownOrgs(): any[] {
+    return this.flattenedTree().map(org => {
+      // Indent based on depth in the hierarchy
+      const prefix = '\u00A0\u00A0'.repeat(org.depth) + (org.depth > 0 ? '└─ ' : '');
+      return {
+        ...org,
+        displayName: prefix + org.name
+      };
     });
+  }
+
+  isParentOptionEnabled(parent: any): boolean {
+    if (!parent) return false;
+
+    // Prevent self-selection
+    if (this.isEditMode() && parent.id === this.formOrg.id) return false;
+
+    // Prevent cycles (descendants of self)
+    const descendants = this.isEditMode() && this.formOrg.id ? this.getDescendantIds(this.formOrg.id) : [];
+    if (this.isEditMode() && descendants.includes(parent.id)) return false;
+
+    const type = this.formOrg.org_type;
+
+    if (this.auth.isSchoolAdmin()) {
+      // School Admin: show ONLY the organizations they are directly assigned to.
+      const scopedOrgIds = this.auth.orgScope().map(s => s.organizationId);
+      return scopedOrgIds.includes(parent.id);
+    }
+
+    // University / Super Admin: enforce strict type hierarchy
+    const allowed = this.getAllowedParentTypes(type);
+    if (allowed.length > 0 && !allowed.includes(parent.org_type)) return false;
+    if (type === 'university') return false;
+
+    return true;
+  }
+
+  filteredParentOrgs(): any[] {
+    return this.getDropdownOrgs().filter(org => this.isParentOptionEnabled(org));
   }
 
   getAvailableOrgTypes() {
@@ -302,13 +351,15 @@ export class AdminOrganizations implements OnInit {
   }
 
   onOrgTypeChange(newType: string) {
-    if (this.auth.isSchoolAdmin()) {
-      this.formOrg.org_type = newType;
-      const allowed = this.filteredParentOrgs();
-      const currentParentId = this.formOrg.parent_id;
-      if (!currentParentId || !allowed.some(org => org.id === currentParentId)) {
-        this.formOrg.parent_id = allowed.length > 0 ? allowed[0].id : null;
+    this.formOrg.org_type = newType;
+    const allowed = this.filteredParentOrgs();
+    const currentParentId = this.formOrg.parent_id;
+    if (currentParentId) {
+      if (!allowed.some(org => org.id === currentParentId)) {
+        this.formOrg.parent_id = this.auth.isSchoolAdmin() && allowed.length > 0 ? allowed[0].id : null;
       }
+    } else if (this.auth.isSchoolAdmin() && allowed.length > 0) {
+      this.formOrg.parent_id = allowed[0].id;
     }
   }
 
@@ -322,7 +373,7 @@ export class AdminOrganizations implements OnInit {
     if (selectedId && allowed.some(org => org.id === selectedId)) {
       this.formOrg.parent_id = selectedId;
     } else {
-      this.formOrg.parent_id = allowed.length > 0 ? allowed[0].id : null;
+      this.formOrg.parent_id = this.auth.isSchoolAdmin() && allowed.length > 0 ? allowed[0].id : null;
     }
 
     this.showFormModal.set(true);

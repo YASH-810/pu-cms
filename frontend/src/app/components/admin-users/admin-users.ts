@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { OrganizationService, Organization } from '../../services/organization.service';
 import { ToastService } from '../../services/toast.service';
@@ -239,6 +239,14 @@ export class AdminUsers implements OnInit {
 
   activeCount = signal(0);
 
+  constructor() {
+    effect(() => {
+      if (this.auth.context()) {
+        this.loadOrganizations();
+      }
+    });
+  }
+
   toggleRowDropdown(id: string) {
     if (this.activeRowDropdown() === id) {
       this.activeRowDropdown.set(null);
@@ -249,7 +257,6 @@ export class AdminUsers implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
-    this.loadOrganizations();
     this.loadRoles();
   }
 
